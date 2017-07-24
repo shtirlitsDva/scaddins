@@ -115,11 +115,7 @@ namespace SCaddins.SCoord
 
             ProjectLocation currentLocation = doc.ActiveProjectLocation;
             var origin = new XYZ(0, 0, 0);
-            #if REVIT2018
             ProjectPosition projectPosition = currentLocation.GetProjectPosition(origin);
-            #else
-            ProjectPosition projectPosition = currentLocation.get_ProjectPosition(origin);
-            #endif
 
             var form = new SCoordForm();
             System.Windows.Forms.DialogResult r = form.ShowDialog();

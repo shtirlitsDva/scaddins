@@ -19,20 +19,35 @@ namespace SCaddins.Common
 {
     using System;
     using System.Windows.Forms;
+    using SCaddins.Properties;
 
     public partial class UpgradeForm : Form
     {
-        public UpgradeForm(Version installed, Version remote)
+        private string downloadLink = string.Empty;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Forms.Control.set_Text(System.String)")]
+        public UpgradeForm(Version installed, Version remote, string body, string downloadLink)
         {
+            this.downloadLink = downloadLink;
+
+            if (installed == null) {
+                installed = new Version(0, 0, 0);
+                body = Resources.UpgrateVersionCheckErrorMessage;
+            }
+            if (remote == null) {
+                remote = new Version(0, 0, 0);
+                body = Resources.UpgrateVersionCheckErrorMessage;
+            }
             this.InitializeComponent();
-            labelInstalledVersion.Text = "Installed Version: " + installed.ToString();
-            labelLatestVersion.Text = "Latest Version: " + remote.ToString();
+            labelInstalledVersion.Text = SCaddins.Properties.Resources.InstalledVersion + @": " + installed.ToString();
+            labelLatestVersion.Text = SCaddins.Properties.Resources.LatestVersion + @": "  + remote.ToString();
+            textBox1.Text = body;
             if (installed < remote) {
-                labelUpgradeNote.Text = "New Version Available!. Click Download (go on, you can do it)";
+                labelUpgradeNote.Text = Resources.UpgrateNewVersionAvailableMessage;
                 buttonDownload.Enabled = true;
                 buttonLog.Enabled = true;
             } else {
-                labelUpgradeNote.Text = "SCaddins is up to date. Nice one.";
+                labelUpgradeNote.Text = Resources.UpgradeUpToDateMessage;
                 buttonDownload.Enabled = false;
                 buttonLog.Enabled = true;
             }
@@ -40,7 +55,7 @@ namespace SCaddins.Common
 
         private void Button3Click(object sender, EventArgs e)
         {
-          System.Diagnostics.Process.Start(SCaddins.Constants.DownloadLink);
+          System.Diagnostics.Process.Start(downloadLink);
         }
 
         private void Button1Click(object sender, EventArgs e)

@@ -1,4 +1,4 @@
-﻿// (C) Copyright 2014 by Andrew Nicholas andrewnicholas@iinet.net.au
+﻿// (C) Copyright 2014-2017 by Andrew Nicholas andrewnicholas@iinet.net.au
 //
 // This file is part of SCaddins.
 //
@@ -25,32 +25,32 @@ namespace SCaddins
     public static class Constants
     {
         /// <summary> Example project configuration dir. </summary>
-        public const string EtcDir = "etc";
+        public const string EtcDirectory = "etc";
 
         /// <summary> Data directory. </summary>
-        public const string ShareDir = "share";
+        public const string ShareDirectory = "share";
 
         /// <summary> Data directory. </summary>
-        public const string OptDir = "opt";
+        public const string OptDirectory = "opt";
 
         /// <summary> The install dir.</summary>
-        public const string InstallDir = @"C:\Program Files\SCaddins\SCaddins\";
+        public const string InstallDirectory = @"C:\Program Files\SCaddins\SCaddins\";
 
         /// <summary> Web [http] link to source code. </summary>
         public const string SourceLink =
-            "https://bitbucket.org/anicholas/scaddins";
+            "https://github.com/acnicholas/scaddins";
 
         /// <summary> Web [http] link to download binaries. </summary>
         public const string DownloadLink =
-            "https://bitbucket.org/anicholas/scaddins/downloads";
+            "https://github.com/acnicholas/scaddins/releases/latest";
 
         /// <summary> Web [http] link to changelog. </summary>
         public const string ChangelogLink =
-            "https://bitbucket.org/anicholas/scaddins/raw/master/CHANGELOG.md";
+            "https://github.com/acnicholas/scaddins/blob/master/CHANGELOG.md";
 
         /// <summary> Web [http] link to forum. </summary>
         public const string HelpLink =
-            "https://bitbucket.org/anicholas/scaddins/wiki/Home";
+            "https://github.com/acnicholas/scaddins/wiki";
 
         /// <summary> License to display in about box. </summary>
         public static readonly string License =
@@ -70,17 +70,17 @@ namespace SCaddins
             "Public License along with SCaddins.  " +
             "If not, see <http://www.gnu.org/licenses/>.";
 
-        public static string FamilyDir
+        public static string FamilyDirectory
         {
             get {
-                return InstallDir + @"\" + ShareDir + @"\rfa\";
+                return InstallDirectory + @"\" + ShareDirectory + @"\rfa\";
             }
         }
 
-        public static string IconDir
+        public static string IconDirectory
         {
             get {
-                return InstallDir + @"\" + ShareDir + @"\icons\";
+                return InstallDirectory + @"\" + ShareDirectory + @"\icons\";
             }
         }
     }

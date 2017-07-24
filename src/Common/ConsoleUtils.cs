@@ -20,17 +20,20 @@ namespace SCaddins.Common
     using System;
     using System.Diagnostics;
     using System.Security;
+    using System.Security.Permissions;
 
-    public static class ConsoleUtilities
+    internal static class ConsoleUtilities
     {
         [SecurityCritical]
-        public static void StartHiddenConsoleProg(string exePath, string args)
+        [PermissionSetAttribute(SecurityAction.Demand, Name = "FullTrust")]
+        internal static void StartHiddenConsoleProg(string exePath, string args)
         {
             StartHiddenConsoleProg(exePath, args, 20000);
         }
         
         [SecurityCritical]
-        public static void StartHiddenConsoleProg(string exePath, string args, int waitTime)
+        [PermissionSetAttribute(SecurityAction.Demand, Name = "FullTrust")]
+        internal static void StartHiddenConsoleProg(string exePath, string args, int waitTime)
         {
             var startInfo = new System.Diagnostics.ProcessStartInfo();
             startInfo.FileName = exePath;
@@ -39,9 +42,9 @@ namespace SCaddins.Common
             if (!string.IsNullOrEmpty(args)) {
                 startInfo.Arguments = args;
             }
-            var p = new Process();
-            p = System.Diagnostics.Process.Start(startInfo);
+            Process p = System.Diagnostics.Process.Start(startInfo);
             p.WaitForExit(waitTime);
+            p.Dispose();
         }
     }
 }

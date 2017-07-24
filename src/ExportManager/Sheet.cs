@@ -157,7 +157,7 @@ namespace SCaddins.ExportManager
             get { return this.RevitScaleWithoutFormatting() == this.scaleBarScale.Trim(); }
         }
         
-        public string ExportDir
+        public string ExportDirectory
         {
             get; set;
         }
@@ -169,11 +169,13 @@ namespace SCaddins.ExportManager
         
         public string NorthPointVisible
         {
-            get { 
-                if (northPointVisible == 1)
+            get {
+                if (northPointVisible == 1) {
                     return "Yes";
-                if (northPointVisible == 0)
+                }
+                if (northPointVisible == 0) {
                     return "No";
+                }
                 return "-";
             }
         }
@@ -221,9 +223,12 @@ namespace SCaddins.ExportManager
         }
         #endregion
         
-        public static int GetNorthPointVisiblity(Element titleBlock)
+        public static int GetNorthPointVisibility(Element titleBlock)
         {
-          try {
+            if (titleBlock == null) {
+                return 2;
+            }
+            try {
                     var p = titleBlock.GetParameters(Settings1.Default.NorthPointVisibilityParameter);
                     if (p == null || p.Count < 1) {
                         return 2;
@@ -234,11 +239,13 @@ namespace SCaddins.ExportManager
                     return 2;
             }    
         }
-
         
         public static string GetScaleBarScale(Element titleBlock)
         {
-          try {
+            if (titleBlock == null) {
+                return string.Empty;
+            }
+            try {
                     var p = titleBlock.GetParameters(Settings1.Default.ScalebarScaleParameter);
                     if (p == null || p.Count < 1) {
                         return string.Empty;
@@ -252,7 +259,7 @@ namespace SCaddins.ExportManager
 
         public string FullExportPath(string extension)
         {
-            return this.ExportDir + "\\" + this.fullExportName + extension;
+            return this.ExportDirectory + "\\" + this.fullExportName + extension;
         }
 
         /// <summary>
@@ -268,7 +275,7 @@ namespace SCaddins.ExportManager
                 this.scale = titleBlock.get_Parameter(
                     BuiltInParameter.SHEET_SCALE).AsString();
                 this.scaleBarScale = ExportSheet.GetScaleBarScale(titleBlock);
-                this.northPointVisible = ExportSheet.GetNorthPointVisiblity(titleBlock);
+                this.northPointVisible = ExportSheet.GetNorthPointVisibility(titleBlock);
                 this.width = titleBlock.get_Parameter(
                         BuiltInParameter.SHEET_WIDTH).AsDouble();
                 this.height = titleBlock.get_Parameter(
@@ -292,9 +299,9 @@ namespace SCaddins.ExportManager
                 return string.IsNullOrEmpty(result.Trim()) ? "0" : result.Substring(i + 2).Trim();
         }
         
-        public void SetSegmentedSheetName(SegmentedSheetName segmentedFileName)
+        public void SetSegmentedSheetName(SegmentedSheetName newSegmentedFileName)
         {
-            this.segmentedFileName = segmentedFileName;
+            this.segmentedFileName = newSegmentedFileName;
             this.SetExportName();
         }
 
@@ -316,7 +323,9 @@ namespace SCaddins.ExportManager
         {
             var titleBlock = ExportManager.TitleBlockInstanceFromSheetNumber(
                 this.sheetNumber, this.doc);
-            this.SetScaleBarScale(titleBlock);       
+            if (titleBlock != null) {
+                this.SetScaleBarScale(titleBlock);
+            }
         }
         
         public void ToggleNorthPoint()
@@ -327,16 +336,17 @@ namespace SCaddins.ExportManager
                 string northPointVisibility = SCaddins.ExportManager.Settings1.Default.NorthPointVisibilityParameter;
             
                 var tb = titleBlock.GetParameters(northPointVisibility);
-                if (tb == null) {
+                if (tb == null || tb.Count < 1) {
                     return;
                 }
                 Parameter p = tb[0];
                 int b = p.AsInteger();
-                if (b == 2) return;
+                if (b == 2) {
+                    return;
+                }
                 b = b == 1 ? 0 : 1;
                 p.Set(b);
-                this.northPointVisible = b;         
-             
+                this.northPointVisible = b;                 
         }
 
         public void UpdateRevision(bool refreshExportName)
@@ -356,10 +366,15 @@ namespace SCaddins.ExportManager
         public void SetScaleBarScale(Element titleBlock)
         {
                 string titleScale = SCaddins.ExportManager.Settings1.Default.ScalebarScaleParameter;
-                var tb = titleBlock.GetParameters(titleScale);
-                if (tb == null) {
+                if (string.IsNullOrEmpty(titleScale) || titleBlock == null) {
                     return;
                 }
+
+                var tb = titleBlock.GetParameters(titleScale);
+                if (tb == null || tb.Count < 1) {
+                    return;
+                }
+
                 Parameter p = tb[0];
                 p.SetValueString(this.RevitScaleWithoutFormatting());
                 this.scaleBarScale = this.RevitScaleWithoutFormatting();          
@@ -410,7 +425,7 @@ namespace SCaddins.ExportManager
                 this.sheetRevision,
                 this.sheetRevisionDate,
                 this.sheetRevisionDescription,
-                this.ExportDir);
+                this.ExportDirectory);
         }
                
         private void Init(
@@ -423,7 +438,7 @@ namespace SCaddins.ExportManager
             this.sheet = viewSheet;
             this.segmentedFileName = sheetName;
             this.verified = false;
-            this.ExportDir = scx.ExportDir;
+            this.ExportDirectory = scx.ExportDirectory;
             this.sheetNumber = viewSheet.get_Parameter(
                     BuiltInParameter.SHEET_NUMBER).AsString();
             this.sheetDescription = viewSheet.get_Parameter(
@@ -431,7 +446,6 @@ namespace SCaddins.ExportManager
             this.projectNumber = document.ProjectInformation.Number;
             this.width = 841;
             this.height = 594;
-            // this.scaleValue = 
             this.scale = string.Empty;
             this.scaleBarScale = string.Empty;
             this.northPointVisible = 2;

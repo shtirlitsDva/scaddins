@@ -17,8 +17,8 @@ namespace SCaddins.ParameterUtils
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Globalization;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.DB.Architecture;
@@ -39,9 +39,13 @@ namespace SCaddins.ParameterUtils
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Because this hach only works this way...")]  
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Because this hack only works this way...")]  
         public static void RenumberByPicks(UIDocument uidoc, Document doc, UIApplication app)
         {
+            if (uidoc == null || app == null) {
+                return;
+            }
+
             IList<Reference> refList = new List<Reference>();
             try {
                 while (true) {
@@ -96,17 +100,19 @@ namespace SCaddins.ParameterUtils
 
         public static void RenumberBySpline(ElementId id, Document doc)
         {
-            FilteredElementCollector collector = new FilteredElementCollector(doc, doc.ActiveView.Id);
-            collector.OfCategory(BuiltInCategory.OST_Rooms);
-
-            Element spline = doc.GetElement(id);
-            if (spline is CurveElement) {
-                CurveElement ce = spline as CurveElement;
-                foreach (Element e in collector) {
-                    Room room = e as Room;
-                    if (ce.CurveElementType == CurveElementType.ModelCurve) {
-                        // IntersectionResultArray results;
-                        // SetComparisonResult result = ce.GeometryCurve.Intersect(room.Geometry, out results );
+            if (doc != null) {
+                using (FilteredElementCollector collector = new FilteredElementCollector(doc, doc.ActiveView.Id)) {
+                    collector.OfCategory(BuiltInCategory.OST_Rooms);
+                    Element spline = doc.GetElement(id);
+                    if (spline is CurveElement) {
+                        CurveElement ce = spline as CurveElement;
+                        foreach (Element e in collector) {
+                            Room room = e as Room;
+                            if (ce.CurveElementType == CurveElementType.ModelCurve) {
+                                // IntersectionResultArray results;
+                                // SetComparisonResult result = ce.GeometryCurve.Intersect(room.Geometry, out results );
+                            }
+                        }
                     }
                 }
             }
@@ -117,6 +123,10 @@ namespace SCaddins.ParameterUtils
             ref string message,
             Autodesk.Revit.DB.ElementSet elements)
         {
+            if (commandData == null) {
+                return Result.Failed;
+            }
+
             UIDocument udoc = commandData.Application.ActiveUIDocument;
             Document doc = udoc.Document;
             UIApplication app = commandData.Application;

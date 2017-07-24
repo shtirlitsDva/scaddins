@@ -31,17 +31,6 @@ namespace SCaddins.ExportManager
              return System.IO.File.Exists(config);
         }
 
-        [SecurityCritical]
-        public static void EditConfigFile(Document doc)
-        {
-            string config = ExportManager.GetConfigFileName(doc);
-            if (System.IO.File.Exists(config)) {
-                System.Diagnostics.Process.Start(SCaddins.ExportManager.Settings1.Default.TextEditor, config);
-            } else {
-                TaskDialog.Show("SCexport", "config file does not exist");
-            }
-        }
-
         public static void CreateConfigFile(Document doc)
         {
             string config = ExportManager.GetConfigFileName(doc);
@@ -55,9 +44,9 @@ namespace SCaddins.ExportManager
             }
 
             if (overwrite == TaskDialogResult.Yes) {
-                string example = SCaddins.Constants.InstallDir +
+                string example = SCaddins.Constants.InstallDirectory +
                     Path.DirectorySeparatorChar +
-                    SCaddins.Constants.ShareDir +
+                    SCaddins.Constants.ShareDirectory +
                     Path.DirectorySeparatorChar +
                     Constants.ExampleConfigFileName;
                 if (System.IO.File.Exists(example)) {
@@ -88,6 +77,9 @@ namespace SCaddins.ExportManager
 
         public static string GetCentralFileName(Document doc)
         {
+            if (doc == null) {
+                return string.Empty;
+            }
             if (doc.IsWorkshared) {
                 ModelPath mp = doc.GetWorksharingCentralModelPath();
                 string s = ModelPathUtils.ConvertModelPathToUserVisiblePath(mp);
@@ -100,7 +92,7 @@ namespace SCaddins.ExportManager
         public static bool IsFileLocked(System.IO.FileInfo file)
         {
             System.IO.FileStream stream = null;
-            if (file.Exists == false) {
+            if (file == null || file.Exists == false) {
                 return false;
             }
             try {
@@ -122,14 +114,15 @@ namespace SCaddins.ExportManager
         public static bool CanOverwriteFile(string fileName)
         {
             if (IsFileLocked(new FileInfo(fileName))) {
-                var td = new TaskDialog("File in use");
-                td.MainContent = "The file: " + fileName + " appears to be in use." +
-                    System.Environment.NewLine +
-                    "please close it before continuing...";
-                td.MainInstruction = "File in use";
-                td.CommonButtons = TaskDialogCommonButtons.Ok;
-                td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
-                td.Show();
+                using (var td = new TaskDialog("File in use")) {
+                    td.MainContent = "The file: " + fileName + " appears to be in use." +
+                        System.Environment.NewLine +
+                        "please close it before continuing...";
+                    td.MainInstruction = "File in use";
+                    td.CommonButtons = TaskDialogCommonButtons.Ok;
+                    td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
+                    td.Show();
+                }
                 if (IsFileLocked(new FileInfo(fileName))) {
                     return false;
                 }
@@ -168,6 +161,16 @@ namespace SCaddins.ExportManager
             }
 
             return null;
+        }
+
+        [SecurityCritical]
+        internal static void EditConfigFile(Document doc) {
+            string config = ExportManager.GetConfigFileName(doc);
+            if (System.IO.File.Exists(config)) {
+                System.Diagnostics.Process.Start(SCaddins.ExportManager.Settings1.Default.TextEditor, config);
+            } else {
+                TaskDialog.Show("SCexport", "config file does not exist");
+            }
         }
     }
 }

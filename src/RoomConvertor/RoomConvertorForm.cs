@@ -20,6 +20,7 @@ namespace SCaddins.RoomConvertor
     using System;
     using System.Collections.ObjectModel;
     using System.Windows.Forms;
+    using SCaddins.Properties;
     
     public partial class MainForm : System.Windows.Forms.Form
     {
@@ -30,6 +31,9 @@ namespace SCaddins.RoomConvertor
 
         public MainForm(RoomConversionManager scasfar)
         {
+            if (scasfar == null) {
+                throw new ArgumentNullException("scasfar");
+            }
             InitializeComponent();          
 
             this.roomConversionManager = scasfar;
@@ -45,9 +49,9 @@ namespace SCaddins.RoomConvertor
 
             // assign tooltips
             var filterTip = new ToolTip();
-            filterTip.SetToolTip(this.buttonFilter, @"Filter the room list(above) by selected parameter values.");
+            filterTip.SetToolTip(this.buttonFilter, Resources.RoomToolsFilterRoomList);
             var renameTip = new ToolTip();
-            renameTip.SetToolTip(this.buttonRename, @"Bulk rename selected items in the list above.");
+            renameTip.SetToolTip(this.buttonRename, Resources.RoomToolsBulkRename);
 
             // load list into view
             LoadDataGridSource();
@@ -63,11 +67,11 @@ namespace SCaddins.RoomConvertor
         private void AddDataGridColumns()
         {
             dataGridView1.AutoGenerateColumns = false;           
-            SCaddins.SheetCopier.MainForm.AddColumn("Number", "Room Number", dataGridView1);
-            SCaddins.SheetCopier.MainForm.AddColumn("Name", "Room Name", dataGridView1);            
-            SCaddins.SheetCopier.MainForm.AddColumn("DestinationViewName", "New Plan Name", dataGridView1, false);
-            SCaddins.SheetCopier.MainForm.AddColumn("DestinationSheetNumber", "New Sheet Number", dataGridView1, false);
-            SCaddins.SheetCopier.MainForm.AddColumn("DestinationSheetName", "New Sheet Name", dataGridView1, false);
+            SCaddins.SheetCopier.MainForm.AddColumn("Number", Resources.RoomToolsRoomNumber, dataGridView1);
+            SCaddins.SheetCopier.MainForm.AddColumn("Name", Resources.RoomToolsRoomName, dataGridView1);            
+            SCaddins.SheetCopier.MainForm.AddColumn("DestinationViewName", Resources.RoomToolsNewPlanName, dataGridView1, false);
+            SCaddins.SheetCopier.MainForm.AddColumn("DestinationSheetNumber", Resources.RoomToolsNewSheetNumber, dataGridView1, false);
+            SCaddins.SheetCopier.MainForm.AddColumn("DestinationSheetName", Resources.RoomToolsNewSheetName, dataGridView1, false);
         }
 
         private void ButtonFilterClick(object sender, EventArgs e)
@@ -96,7 +100,7 @@ namespace SCaddins.RoomConvertor
             return c;
         }
 
-        void DataGridView1SelectionChanged(object sender, EventArgs e)
+        private void DataGridView1SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridView1.CurrentCell != null && dataGridView1.CurrentCell.RowIndex != -1) {
                 var c = (RoomConversionCandidate)dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].DataBoundItem;
@@ -105,7 +109,7 @@ namespace SCaddins.RoomConvertor
             }
         }
 
-        void ButtonInfoClick(object sender, EventArgs e)
+        private void ButtonInfoClick(object sender, EventArgs e)
         {
             if (info.Visible) {
                 info.Hide();
@@ -114,7 +118,7 @@ namespace SCaddins.RoomConvertor
             }
         }
 
-        void ButtonResetFiltersClick(object sender, EventArgs e)
+        private void ButtonResetFiltersClick(object sender, EventArgs e)
         {
             dataGridView1.DataSource = null;
             roomConversionManager.Reset();
@@ -123,42 +127,43 @@ namespace SCaddins.RoomConvertor
             dataGridView1.Refresh();
         }
 
-        void MainFormFormClosing(object sender, FormClosingEventArgs e)
+        private void MainFormFormClosing(object sender, FormClosingEventArgs e)
         {
             info.Dispose();
             rfd.Dispose();
             Dispose();
         }
         
-        void ToggleMainButtonText()
+        private void ToggleMainButtonText()
         {
-            buttonMain.Text = radioButtonCreateMasses.Checked ? "Create Masses" : "Create Plans and Sheets";
+            buttonMain.Text = radioButtonCreateMasses.Checked ? Resources.RoomToolsCreateMasses : Resources.RoomToolsCreatePlansAndSheets;
             bool b = radioButtonCreateSheets.Checked;
             dataGridView1.Columns[2].Visible = b;
             dataGridView1.Columns[3].Visible = b;
             dataGridView1.Columns[4].Visible = b; 
         }
 
-        void RadioButton1CheckedChanged(object sender, EventArgs e)
+        private void RadioButton1CheckedChanged(object sender, EventArgs e)
         {
             ToggleMainButtonText();
         }
                
-        void Button4Click(object sender, EventArgs e)
+        private void Button4Click(object sender, EventArgs e)
         {
             roomConversionManager.SynchronizeMassesToRooms();
         }
               
-        void ButtonMainClick(object sender, EventArgs e)
+        private void ButtonMainClick(object sender, EventArgs e)
         {
             Button button = sender as Button;
-            if (button.Text == "Create Masses") {
+            if (button.Text == Resources.RoomToolsCreateMasses) {
                 roomConversionManager.CreateRoomMasses(GetSelectedCandidates());      
             } else {
-                RoomToSheetWizard wizard = new RoomToSheetWizard(this.roomConversionManager);
-                DialogResult result = wizard.ShowDialog();
-                if (result == DialogResult.OK) {
-                    roomConversionManager.CreateViewsAndSheets(GetSelectedCandidates());
+                using (var wizard = new RoomToSheetWizard(this.roomConversionManager)) {
+                    DialogResult result = wizard.ShowDialog();
+                    if (result == DialogResult.OK) {
+                        roomConversionManager.CreateViewsAndSheets(GetSelectedCandidates());
+                    }
                 }
             } 
         }             

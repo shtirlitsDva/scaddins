@@ -22,6 +22,7 @@ namespace SCaddins.ViewUtilities
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
     using SCaddins.Common;
+    using SCaddins.Properties;
 
     /// <summary>
     /// Copy a view; give it a user name, remove any view templates and
@@ -31,13 +32,19 @@ namespace SCaddins.ViewUtilities
     {     
         public static bool Create(View sourceView, Document doc)
         {
+            if (sourceView == null || doc == null) {
+                return false;
+            }
+
             if (sourceView.ViewType == ViewType.DrawingSheet) {
                 Create(sourceView as ViewSheet, doc);
                 return true;
             }
+
             if (ValidViewType(sourceView.ViewType)) {
-                    return CreateView(sourceView, doc);
+                return CreateView(sourceView, doc);
             }
+
             ShowErrorDialog(sourceView);
             return false;   
         }
@@ -45,36 +52,62 @@ namespace SCaddins.ViewUtilities
         public static void Create(ICollection<SCaddins.ExportManager.ExportSheet> sheets, Document doc)
         {
             string message = string.Empty;
-            var t = new Transaction(doc, "SCuv Copies User Views");
-            t.Start();
-            foreach (SCaddins.ExportManager.ExportSheet sheet in sheets) {
-                message += Create(sheet.Sheet, doc);
+            if (sheets == null || doc == null) {
+                message += SCaddins.Properties.Resources.CouldNotCreateUserView;
+            } else {
+                using (var t = new Transaction(doc, "SCuv Copies User Views")) {
+                    if (t.Start() == TransactionStatus.Started) {
+                        foreach (SCaddins.ExportManager.ExportSheet sheet in sheets) {
+                            message += Create(sheet.Sheet, doc);
+                        }
+                        t.Commit();
+                    } else {
+                        TaskDialog.Show("Error", "Could not start user view transaction");
+                    }
+                }
             }
-            t.Commit();
             ShowSummaryDialog(message);
     }
                     
-        public static string GetNewViewName(Element sourceView)
+        public static string GetNewViewName(Document doc, Element sourceView)
         { 
-            return Environment.UserName + "-" + sourceView.Name + "-" + MiscUtilities.GetDateString;           
+            if (doc == null || sourceView == null) {
+                return string.Empty;
+            }
+            string name = sourceView.Name;
+
+            // Revit wont allow { or } so replace them if they exist
+            name = name.Replace(@"{", string.Empty).Replace(@"}", string.Empty);
+            name = Environment.UserName + "-" + name + "-" + MiscUtilities.GetDateString;
+            if (SolarUtilities.Command.ViewNameIsAvailable(doc, name)) {
+                return name;
+            } else {
+                return SolarUtilities.Command.GetNiceViewName(doc, name);
+            }
         } 
         
         public static void ShowErrorDialog(Element sourceView)
         {
-            var td = new TaskDialog("SCuv - SCuv copies users views");
-            td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
-            td.MainInstruction = "Error creating user view for view:";
-            td.MainContent = sourceView.Name;
-            td.Show();   
+            if (sourceView == null) {
+                // FIXME add a error message here
+                return;
+            }
+            using (var td = new TaskDialog(Resources.CreateUserView)) {
+                td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
+                td.MainInstruction = "Error creating user view for view:";
+                td.MainContent = sourceView.Name;
+                td.Show();
+            }
         }
 
         public static void ShowSummaryDialog(string message)
         {
-            var td = new TaskDialog("SCuv - SCuv copies users views");
-            td.MainIcon = TaskDialogIcon.TaskDialogIconNone;
-            td.MainInstruction = "Summary of users view created:";
-            td.MainContent = message;
-            td.Show();   
+            using (var td = new TaskDialog(Resources.CreateUserViews)) {
+                td.MainIcon = TaskDialogIcon.TaskDialogIconNone;
+                td.MainInstruction = "Summary of users view created:";
+                td.MainContent = message;
+                td.Show();
+            } 
         }
         
         private static string Create(ViewSheet vs, Document doc)
@@ -84,7 +117,7 @@ namespace SCaddins.ViewUtilities
                 var v = (View)doc.GetElement(id);
                 if (ValidViewType(v.ViewType)) {
                     CreateView(v, doc);
-                    message += GetNewViewName(v) + Environment.NewLine;
+                    message += GetNewViewName(doc, v) + Environment.NewLine;
                 }
             }           
             return message;          
@@ -108,7 +141,7 @@ namespace SCaddins.ViewUtilities
         {
             ElementId destViewId = srcView.Duplicate(ViewDuplicateOption.Duplicate);
             var newView = doc.GetElement(destViewId) as View;
-            newView.Name = GetNewViewName(srcView); 
+            newView.Name = GetNewViewName(doc, srcView); 
             newView.ViewTemplateId = ElementId.InvalidElementId;
             var p = newView.GetParameters("SC-View_Category");
             if (p.Count < 1) {

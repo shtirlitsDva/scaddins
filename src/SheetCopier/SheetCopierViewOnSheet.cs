@@ -31,13 +31,18 @@ namespace SCaddins.SheetCopier
         private string associatedLevelName;
         private View oldView;
         private string viewTemplateName;
-              
         private bool duplicateWithDetailing;
         private ViewPortPlacementMode creationMode;
    
         public SheetCopierViewOnSheet(string title, View view, SheetCopierManager scopy)
         {
+            if (scopy == null) {
+                throw new ArgumentNullException("scopy");
+            }
             this.scopy = scopy;
+            if (view == null) {
+                throw new ArgumentNullException("view");
+            }
             this.oldView = view;
             this.oldId = view.Id;
             this.originalTitle = title;
@@ -147,10 +152,10 @@ namespace SCaddins.SheetCopier
                 }
             }
         }
-        
-        public static bool PlanEnough(ViewType vt)
+               
+        public static bool PlanEnough(ViewType viewType)
         {
-            switch (vt) {
+            switch (viewType) {
                 case ViewType.FloorPlan:
                 case ViewType.CeilingPlan:
                 case ViewType.AreaPlan:

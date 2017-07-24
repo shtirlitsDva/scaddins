@@ -21,6 +21,7 @@ namespace SCaddins.ExportManager
     using System.Globalization;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
+    using SCaddins.Properties;
 
     public static class PrintSettings
     {  
@@ -30,6 +31,10 @@ namespace SCaddins.ExportManager
         /// </summary>
         public static string GetSheetSizeAsString(ExportSheet sheet)
         {
+            if (sheet == null) {
+                return string.Empty;
+            }
+
             double[] p = { 1189, 841, 594, 420, 297, 210, 297, 420, 594, 841, 1189 };
             string[] s = { "A0", "A1", "A2", "A3", "A4", "A4P", "A3P", "A2P", "A1P", "A0P" };
 
@@ -49,6 +54,9 @@ namespace SCaddins.ExportManager
 
         public static bool CreatePrintSetting(Document doc, string isoSheetSize)
         {
+            if (doc == null || string.IsNullOrEmpty(isoSheetSize)) {
+                return false;
+            }
             PrintManager pm = doc.PrintManager;
             bool success = false;
             foreach (PaperSize paperSize in pm.PaperSizes) {
@@ -100,6 +108,7 @@ namespace SCaddins.ExportManager
             return success;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public static bool PrintToDevice(
                 Document doc,
                 string size,
@@ -107,19 +116,23 @@ namespace SCaddins.ExportManager
                 string printerName,
                 ExportLog log)
         {
+            if (pm == null) {
+                return false;
+            }
+
             PrintSetting ps = LoadRevitPrintSetting(doc, size, pm, printerName, log);
             
             if (ps == null) {
                 return false;
             }
             
-            var t = new Transaction(doc, "Apply print settings");
+            var t = new Transaction(doc, Resources.ApplyPrintSettings);
             t.Start();
             try {
                 if (ps.IsValidObject) {
                     pm.PrintSetup.CurrentPrintSetting = ps;
                 } else {
-                    log.AddWarning(null, "Print Setup is readonly!");
+                    log.AddWarning(null, Resources.WarningPrintSetupReadOnly);
                 }
                 pm.PrintRange = PrintRange.Current;
                 pm.PrintSetup.CurrentPrintSetting.PrintParameters.MarginType = MarginType.NoMargin;
@@ -143,6 +156,9 @@ namespace SCaddins.ExportManager
                 string ext,
                 string printerName)
         {
+            if (pm == null || vs == null) {
+                return false;
+            }
             if (vs.SCPrintSetting == null) {
                 vs.UpdateSheetInfo();
                 return false;
@@ -161,16 +177,22 @@ namespace SCaddins.ExportManager
                 pm.PrintToFileName = vs.FullExportPath(ext);
                 pm.Apply();
                 t.Commit();
+                t.Dispose();
                 return true;
             } catch (InvalidOperationException ex) {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 t.RollBack();
+                t.Dispose();
                 return false;
             }
         }
 
         public static PrintSetting GetPrintSettingByName(Document doc, string printSetting)
         {
+            if (doc == null || string.IsNullOrEmpty(printSetting)) {
+                return null;
+            }
+
             foreach (ElementId id in doc.GetPrintSettingIds()) {
                 var ps2 = doc.GetElement(id) as PrintSetting;
                 if (ps2.Name.ToString().Equals("SCX-" + printSetting)) {
@@ -197,10 +219,10 @@ namespace SCaddins.ExportManager
         public static bool SetPrinterByName(
                 Document doc, string name, PrintManager pm)
         {
-            if (string.IsNullOrEmpty(name)) {
+            if (string.IsNullOrEmpty(name) || pm == null) {
                 return false;
             }
-            var t = new Transaction(doc, "Set printer");
+            var t = new Transaction(doc, Resources.SetPrinter);
             t.Start();
             try {
                 pm.SelectNewPrintDriver(name);
@@ -221,17 +243,17 @@ namespace SCaddins.ExportManager
                 string printerName,
                 ExportLog log)
         {       
-            log.AddMessage("Attempting to Load Revit Print Settings:" + size);
+            log.AddMessage(Resources.MessageAttemptingToLoadRevitPrintSettings + size);
             PrintSetting ps = PrintSettings.GetPrintSettingByName(doc, size);
 
             if (ps == null) {
-                log.AddError(null, "Retrieving Revit Print Settings FAILED");
+                log.AddError(null, Resources.ErrorRetrievingRevitPrintSettingsFAILED);
                 return null;
             }
             
-            log.AddMessage("Using printer : " + printerName);
+            log.AddMessage(Resources.MessageUsingPrinter + printerName);
             if (!PrintSettings.SetPrinterByName(doc, printerName, pm)) {
-                log.AddError(null, "Cannot set printer: " + printerName);
+                log.AddError(null, Resources.MessageCannotSetPrinter + printerName);
                 return null;
             } 
             

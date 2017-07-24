@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCaddins.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Windows.Forms;
-using Autodesk.Revit.DB.Architecture;
-using Autodesk.Revit.DB;
-
 namespace SCaddins.RoomConvertor
 {
+    using System.Globalization;
+    using System.Windows.Forms;
+    using Autodesk.Revit.DB.Architecture;
+    using Autodesk.Revit.DB;
+    using SCaddins.Properties;
 
     public partial class RoomInfoDialog : System.Windows.Forms.Form
     {
@@ -29,34 +29,38 @@ namespace SCaddins.RoomConvertor
         {
             InitializeComponent();
             listView1.View = System.Windows.Forms.View.Details;
-            listView1.Columns.Add("Parameter");
-            listView1.Columns.Add("Value");
-            listView1.Columns.Add("Type");
+            listView1.Columns.Add(Resources.Parameter);
+            listView1.Columns.Add(Resources.Value);
+            listView1.Columns.Add(Resources.Type);
             listView1.Columns[0].Width = 200;
             listView1.Columns[1].Width = 200;
             listView1.Columns[2].Width = 100;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         public void UpdateRoomInfo(Room room)
         {
+            if (room == null) {
+                return;
+            }
             this.Text = room.Name;
             this.listView1.Items.Clear();
             foreach (Parameter p in room.Parameters) {  
                 if (p.StorageType != StorageType.ElementId && p.StorageType != StorageType.None) {
-                    listView1.Items.Add(new ListViewItem(new string[]{p.Definition.Name, GetParamValueAsString(p), p.StorageType.ToString()}));
+                    listView1.Items.Add(new ListViewItem(new string[] { p.Definition.Name, GetParamValueAsString(p), p.StorageType.ToString() }));
                 }
             }
         }
 
         private static string GetParamValueAsString(Parameter param)
         {
-            switch (param.StorageType){
+            switch (param.StorageType) {
                 case StorageType.Double:
-                    return param.AsDouble().ToString() + @"(" + param.AsValueString() + @")";
+                    return param.AsDouble().ToString(CultureInfo.CurrentCulture) + @"(" + param.AsValueString() + @")";
                 case StorageType.String:
                     return param.AsString();
                 case StorageType.Integer:
-                     return param.AsInteger().ToString() + @"(" + param.AsValueString() + @")";
+                     return param.AsInteger().ToString(CultureInfo.CurrentCulture) + @"(" + param.AsValueString() + @")";
                 case StorageType.ElementId:
                     return string.Empty;
                 default:

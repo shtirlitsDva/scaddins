@@ -31,15 +31,24 @@ namespace SCaddins.SolarUtilities
         private ProjectPosition position;
         private bool currentViewIsIso;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public Autodesk.Revit.UI.Result Execute(
             ExternalCommandData commandData,
             ref string message,
             Autodesk.Revit.DB.ElementSet elements)
         {
+            if (commandData == null) {
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
             UIDocument udoc = commandData.Application.ActiveUIDocument;
             Document doc = udoc.Document;
             this.projectLocation = doc.ActiveProjectLocation;
+            #if REVIT2018
+            this.position = this.projectLocation.GetProjectPosition(XYZ.Zero);
+            #else
             this.position = this.projectLocation.get_ProjectPosition(XYZ.Zero);
+            #endif
             this.currentViewIsIso = false;
 
             View view = doc.ActiveView;
@@ -70,21 +79,97 @@ namespace SCaddins.SolarUtilities
             return Autodesk.Revit.UI.Result.Succeeded;
         }
 
-        private static bool ViewNameIsAvailable(Document doc, string name)
+        // FIXME put this somewhere else.
+        public static bool ViewNameIsAvailable(Document doc, string name)
         {
-            var c = new FilteredElementCollector(doc);
-            c.OfClass(typeof(Autodesk.Revit.DB.View));
-            foreach (View view in c) {
-                var v = view as View;
-                if (v.ViewName == name) {
-                    return false;
+            using (var c = new FilteredElementCollector(doc)) {
+                c.OfClass(typeof(Autodesk.Revit.DB.View));
+                foreach (View view in c) {
+                    var v = view as View;
+                    if (v.ViewName == name) {
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        private string[] GetViewInfo(View view)
+        // FIXME this can go in a utiliy class.
+        public static string GetNiceViewName(Document doc, string request) {
+            if (ViewNameIsAvailable(doc, request)) {
+                return request;
+            } else {
+                return request + @"(" + (DateTime.Now.TimeOfDay.Ticks / 100000).ToString(CultureInfo.InvariantCulture) + @")";
+            }
+        }
+
+        private static ElementId GetViewFamilyId(Document doc, ViewFamily viewFamilyType)
         {
+            using (var collector = new FilteredElementCollector(doc)) {
+                collector.OfClass(typeof(ViewFamilyType));
+                foreach (Element e in collector) {
+                    var vft = (ViewFamilyType)e;
+                    if (vft.ViewFamily == viewFamilyType) {
+                        return vft.Id;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static ElementId GetHighestLevel(Document doc)
+        {
+            double highestLevel = -1;
+            ElementId highestId = null;
+            using (var collector = new FilteredElementCollector(doc)) {
+                collector.OfClass(typeof(Level));
+                foreach (Element e in collector) {
+                    var level = (Level)e;
+                    if (highestLevel < 0 || level.Elevation > highestLevel) {
+                        highestLevel = level.Elevation;
+                        highestId = level.Id;
+                    }
+                }
+            }
+            return highestId;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        private static void CreateShadowPlanViews(
+            Document doc,
+            DateTime startTime,
+            DateTime endTime,
+            TimeSpan interval)
+        {
+             ElementId id = GetViewFamilyId(doc, ViewFamily.FloorPlan);
+             ElementId levelId = GetHighestLevel(doc);
+             if (id == null || levelId == null) {
+                 return;
+             }
+
+              while (startTime <= endTime) {
+                using (var t = new Transaction(doc)) {
+                    if (t.Start("Create Shadow Plans") == TransactionStatus.Started) {
+                        View view = ViewPlan.Create(doc, id, levelId);
+                        view.ViewTemplateId = ElementId.InvalidElementId;
+                        var niceMinutes = "00";
+                        if (startTime.Minute > 0) {
+                            niceMinutes = startTime.Minute.ToString(CultureInfo.CurrentCulture);
+                        }
+                        var vname = "SHADOW PLAN - " + startTime.ToShortDateString() + "-" + startTime.Hour + "." + niceMinutes;
+                        view.Name = GetNiceViewName(doc, vname);
+                        SunAndShadowSettings sunSettings = view.SunAndShadowSettings;
+                        sunSettings.StartDateAndTime = startTime;
+                        sunSettings.SunAndShadowType = SunAndShadowType.StillImage;
+                        view.SunlightIntensity = 50;
+                        t.Commit();
+                        startTime = startTime.Add(interval);
+                    }
+                }
+            }
+        }
+
+        private string[] GetViewInfo(View view) {
             if (view.ViewType != ViewType.ThreeD) {
                 var info = new string[4];
                 info[0] = "Not a 3d view...";
@@ -114,78 +199,7 @@ namespace SCaddins.SolarUtilities
             }
         }
 
-        private static ElementId GetViewFamilyId(Document doc, ViewFamily viewFamilyType)
-        {
-            var collector = new FilteredElementCollector(doc);
-            collector.OfClass(typeof(ViewFamilyType));
-            foreach (Element e in collector) {
-                var vft = (ViewFamilyType)e;
-                if (vft.ViewFamily == viewFamilyType) {
-                    return vft.Id;
-                }
-            }  
-            return null;
-        }
-
-        private static ElementId GetHighestLevel(Document doc)
-        {
-            var collector = new FilteredElementCollector(doc);
-            collector.OfClass(typeof(Level));
-            double highestLevel = -1;
-            ElementId highestId = null;
-            foreach (Element e in collector) {
-                var level = (Level)e;
-                if (highestLevel < 0 || level.Elevation > highestLevel) {
-                    highestLevel = level.Elevation;
-                    highestId = level.Id;
-                }
-            }
-            return highestId;
-        }
-
-        public static string GetNiceViewName(Document doc, string request)
-        {
-            if (ViewNameIsAvailable(doc, request)) {
-                return request;
-            } else {
-               return request + @"(" + (DateTime.Now.TimeOfDay.Ticks / 100000).ToString(CultureInfo.InvariantCulture) + @")";
-            }
-        }
-
-        private static void CreateShadowPlanViews(
-            Document doc,
-            DateTime startTime,
-            DateTime endTime,
-            TimeSpan interval)
-        {
-             ElementId id = GetViewFamilyId(doc, ViewFamily.FloorPlan);
-             ElementId levelId = GetHighestLevel(doc);
-
-             // FIXME add error message here
-             if (id == null || levelId == null) {
-                 return;
-             }
-
-              while (startTime <= endTime) {
-                var t = new Transaction(doc);
-                t.Start("Create Shadow Plans");
-                View view = ViewPlan.Create(doc, id, levelId);
-                view.ViewTemplateId = ElementId.InvalidElementId;
-                var niceMinutes = "00";
-                if (startTime.Minute > 0) {
-                    niceMinutes = startTime.Minute.ToString(CultureInfo.CurrentCulture);
-                }    
-                var vname = "SHADOW PLAN - " + startTime.ToShortDateString() + "-" + startTime.Hour + "." + niceMinutes;  
-                view.Name = GetNiceViewName(doc, vname);
-                SunAndShadowSettings sunSettings = view.SunAndShadowSettings;
-                sunSettings.StartDateAndTime = startTime;
-                sunSettings.SunAndShadowType = SunAndShadowType.StillImage;
-                view.SunlightIntensity = 50;
-                t.Commit();
-                startTime = startTime.Add(interval);
-            }
-        }
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void CreateWinterViews(
             Document doc,
             UIDocument udoc,
@@ -201,25 +215,29 @@ namespace SCaddins.SolarUtilities
             }
 
             while (startTime <= endTime) {
-                var t = new Transaction(doc);
-                t.Start("Create Solar View");
-                View view = View3D.CreateIsometric(doc, id);
-                view.ViewTemplateId = ElementId.InvalidElementId;
-                var niceMinutes = "00";
-                if (startTime.Minute > 0) {
-                    niceMinutes = startTime.Minute.ToString(CultureInfo.CurrentCulture);
-                }    
-                var vname = "SOLAR ACCESS - " + startTime.ToShortDateString() + "-" + startTime.Hour + "." + niceMinutes;  
-                view.Name = GetNiceViewName(doc, vname);
-                SunAndShadowSettings sunSettings = view.SunAndShadowSettings;
-                sunSettings.StartDateAndTime = startTime;
-                sunSettings.SunAndShadowType = SunAndShadowType.StillImage;
-                t.Commit();
-                this.RotateView(view, doc, udoc);
-                startTime = startTime.Add(interval);
+                using (var t = new Transaction(doc)) {
+                    t.Start("Create Solar View");
+                    View view = View3D.CreateIsometric(doc, id);
+                    view.ViewTemplateId = ElementId.InvalidElementId;
+                    var niceMinutes = "00";
+                    if (startTime.Minute > 0) {
+                        niceMinutes = startTime.Minute.ToString(CultureInfo.CurrentCulture);
+                    }
+                    var vname = "SOLAR ACCESS - " + startTime.ToShortDateString() + "-" + startTime.Hour + "." + niceMinutes;
+                    view.Name = GetNiceViewName(doc, vname);
+                    SunAndShadowSettings sunSettings = view.SunAndShadowSettings;
+                    sunSettings.StartDateAndTime = startTime;
+                    sunSettings.SunAndShadowType = SunAndShadowType.StillImage;
+                    t.Commit();
+
+                    // FIXME too many transactions here and above...
+                    this.RotateView(view, doc, udoc);
+                    startTime = startTime.Add(interval);
+                }
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void RotateView(View view, Document doc, UIDocument udoc)
         {
             if (view.ViewType == ViewType.ThreeD) {
@@ -235,22 +253,23 @@ namespace SCaddins.SolarUtilities
                 var forward = new XYZ(-Math.Sin(azimuth), -Math.Cos(azimuth), -Math.Tan(altitude));
                 var up = forward.CrossProduct(new XYZ(Math.Cos(azimuth), -Math.Sin(azimuth), 0));  
                 var v3d = (View3D)view;
-                var t = new Transaction(doc);
                 if (v3d.IsLocked) {
-                    TaskDialog.Show("ERROR", "View is locked, please unlock before rotating"); 
+                    TaskDialog.Show("ERROR", "View is locked, please unlock before rotating");
                     return;
                 }
-                t.Start("Rotate View");
-                v3d.SetOrientation(new ViewOrientation3D(eye, up, forward));
-                if (v3d.CanBeLocked() && !v3d.Name.StartsWith("{", StringComparison.OrdinalIgnoreCase)) {
-                    try {
-                        v3d.SaveOrientationAndLock();
-                    } catch (InvalidOperationException e) {
-                        System.Diagnostics.Debug.WriteLine(e.Message);
+                using (var t = new Transaction(doc)) {
+                    t.Start("Rotate View");
+                    v3d.SetOrientation(new ViewOrientation3D(eye, up, forward));
+                    if (v3d.CanBeLocked() && !v3d.Name.StartsWith("{", StringComparison.OrdinalIgnoreCase)) {
+                        try {
+                            v3d.SaveOrientationAndLock();
+                        } catch (InvalidOperationException e) {
+                            System.Diagnostics.Debug.WriteLine(e.Message);
+                        }
                     }
-                } 
-                udoc.RefreshActiveView();
-                t.Commit();
+                    udoc.RefreshActiveView();
+                    t.Commit();
+                }
             } else {
                 TaskDialog.Show("ERROR", "Not a 3d view");
             }

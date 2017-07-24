@@ -86,23 +86,24 @@
             get { return this.endTime - this.startTime; }
         }
         
-        public void AddMessage(string msg)
+        public void AddMessage(string message)
         {
-            this.AddLogItem(msg);
+            // Autodesk.Revit.UI.TaskDialog.Show("Debug", message);
+            this.AddLogItem(message);
         }
 
-        public void AddError(string fileName, string msg)
+        public void AddError(string fileName, string message)
         {
-            this.AddLogItem(ErrPrefix + msg);
+            this.AddLogItem(ErrPrefix + message);
             this.errors++;
-            this.errorLog.Add(new ExportLogItem(msg, fileName));
+            this.errorLog.Add(new ExportLogItem(message, fileName));
         }
 
-        public void AddWarning(string fileName, string msg)
+        public void AddWarning(string fileName, string message)
         {
-            this.AddLogItem(WarningPrefix + msg);
+            this.AddLogItem(WarningPrefix + message);
             this.warnings++;
-            this.warningLog.Add(new ExportLogItem(msg, fileName));
+            this.warningLog.Add(new ExportLogItem(message, fileName));
         }
         
         public void Clear()
@@ -114,8 +115,9 @@
 
         public void ShowSummaryDialog()
         {
-            var logDialog = new ExportLogDialog(this);
-            logDialog.ShowDialog();
+            using (var logDialog = new ExportLogDialog(this)) {
+                logDialog.ShowDialog();
+            }
         }
         
         public void Start(string message)

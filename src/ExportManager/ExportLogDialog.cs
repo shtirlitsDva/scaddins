@@ -19,11 +19,18 @@ namespace SCaddins.ExportManager
 {
     using System;
     using System.Windows.Forms;
+    using SCaddins.Properties;
 
     public partial class ExportLogDialog : Form
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Forms.Control.set_Text(System.String)")]
         public ExportLogDialog(ExportLog log)
         {
+            if (log == null) {
+                log = new ExportLog();
+                log.AddError(null, Resources.ExportLogInitializationError);
+            }
+
             this.InitializeComponent();
             foreach (ExportLogItem errorItem in log.ErrorLog) {
                 errors.Items.Add(
@@ -36,9 +43,9 @@ namespace SCaddins.ExportManager
 
             textBox1.Text = log.FullOutputLog;
             textBox1.ScrollToCaret();
-            Tabs.TabPages[1].Text = log.Warnings + " Warnings";
-            Tabs.TabPages[2].Text = log.Errors + " Errors";
-            label1.Text = log.TotalExports + " Exports attempted with " + log.Errors + " errors.";
+            Tabs.TabPages[1].Text = log.Warnings + @" " + Resources.Warnings;
+            Tabs.TabPages[2].Text = log.Errors + @" " + Resources.Errors;
+            label1.Text = log.TotalExports + @" " + Resources.LogDialogExportsAttempted + @" " + log.Errors + @" " + Resources.Errors;
         }
     }
 }

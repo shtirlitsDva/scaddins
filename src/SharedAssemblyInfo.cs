@@ -1,4 +1,4 @@
-﻿// (C) Copyright 2016 by Andrew Nicholas
+﻿// (C) Copyright 2016-2017 by Andrew Nicholas
 //
 // This file is part of SCaddins.
 //
@@ -20,4 +20,4 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyVersion("17.0.1.3")]
+[assembly: AssemblyVersion("18.0.0.0")]

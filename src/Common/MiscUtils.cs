@@ -34,7 +34,10 @@ namespace SCaddins.Common
         }
 
         public static string PadLeftZeros(string s, int desiredLength)
-        {
+        { 
+            if (string.IsNullOrEmpty(s)) {
+                return string.Empty;
+            }
             if (desiredLength > 1 && s.Length == desiredLength - 1) {
                 return "0" + s;
             }
@@ -59,6 +62,10 @@ namespace SCaddins.Common
 
         public static DateTime ToDateTime(string dateValue)
         {
+            if (string.IsNullOrEmpty(dateValue)) {
+                return new DateTime();
+            }
+
             var date = dateValue.Trim();
             const string DateDelimiters = @"-.\/_ ";
             char[] c = DateDelimiters.ToCharArray();

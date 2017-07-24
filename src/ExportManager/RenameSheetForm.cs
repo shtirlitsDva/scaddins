@@ -100,11 +100,9 @@ namespace SCaddins.ExportManager
             ICollection<Autodesk.Revit.DB.ElementId> revisions = sheet.Sheet.GetAdditionalRevisionIds();
             revisions.Clear();
             sheet.Sheet.SetAdditionalRevisionIds(revisions);
-              
-            Autodesk.Revit.DB.View view = sheet.Sheet as Autodesk.Revit.DB.View;
-            // Autodesk.Revit.DB.View view = sheet.Sheet;
-                               
+            Autodesk.Revit.DB.View view = sheet.Sheet as Autodesk.Revit.DB.View;                             
             List<Autodesk.Revit.DB.Revision> hiddenRevisionClouds = SheetCopierManager.GetAllHiddenRevisions(this.doc);
+
             // turn on hidden revisions
             foreach (Autodesk.Revit.DB.Revision rev in hiddenRevisionClouds) {
                 rev.Visibility = Autodesk.Revit.DB.RevisionVisibility.CloudAndTagVisible;
@@ -129,28 +127,31 @@ namespace SCaddins.ExportManager
         private void RenameSheets(ICollection<ExportSheet> sheets)
         {
             bool removeRevisions = false;
-            var t = new Autodesk.Revit.DB.Transaction(this.doc);
-            t.Start("SCexport - Rename Sheets");
-            Autodesk.Revit.UI.TaskDialog td = new Autodesk.Revit.UI.TaskDialog("Remove revisions?");
-            td.MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconWarning;
-            td.CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.No | Autodesk.Revit.UI.TaskDialogCommonButtons.Yes;
-            td.MainInstruction = "Remove Revisions?";
-            td.MainContent = "do you want to remove all revisions from the selected sheets after renaming them?";
-            Autodesk.Revit.UI.TaskDialogResult tdr = td.Show();
-            
-            if (tdr == Autodesk.Revit.UI.TaskDialogResult.Yes) {
-                removeRevisions = true;
-            }
-            
-            foreach (ExportSheet sheet in sheets) {
-                sheet.Sheet.Name = this.NewSheetName(sheet.SheetDescription);
-                sheet.Sheet.SheetNumber = this.NewSheetNumber(sheet.SheetNumber);
-                   
-                if (removeRevisions) {  
-                    RemoveRevisions(sheet);
+            using (var t = new Autodesk.Revit.DB.Transaction(this.doc)) {
+                // FIXME add error message when transcation fails to start.
+                if (t.Start("SCexport - Rename Sheets") == Autodesk.Revit.DB.TransactionStatus.Started) {
+                    using (Autodesk.Revit.UI.TaskDialog td = new Autodesk.Revit.UI.TaskDialog("Remove revisions?")) {
+                        td.MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconWarning;
+                        td.CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.No | Autodesk.Revit.UI.TaskDialogCommonButtons.Yes;
+                        td.MainInstruction = "Remove Revisions?";
+                        td.MainContent = "do you want to remove all revisions from the selected sheets after renaming them?";
+                        Autodesk.Revit.UI.TaskDialogResult tdr = td.Show();
+                        if (tdr == Autodesk.Revit.UI.TaskDialogResult.Yes) {
+                            removeRevisions = true;
+                        }
+                    }
+
+                    foreach (ExportSheet sheet in sheets) {
+                        sheet.Sheet.Name = this.NewSheetName(sheet.SheetDescription);
+                        sheet.Sheet.SheetNumber = this.NewSheetNumber(sheet.SheetNumber);
+
+                        if (removeRevisions) {
+                            RemoveRevisions(sheet);
+                        }
+                    }
+                    t.Commit();
                 }
             }
-            t.Commit();
         }
 
         private void RenameSheets(System.ComponentModel.BindingList<SheetCopierSheet> sheets)

@@ -1,4 +1,4 @@
-﻿// (C) Copyright 2015 by Andrew Nicholas
+﻿// (C) Copyright 2015-2017 by Andrew Nicholas
 //
 // This file is part of SCaddins.
 //
@@ -26,45 +26,54 @@ namespace SCaddins.ViewUtilities
         public static void RemoveUnderlays(
             ICollection<SCaddins.ExportManager.ExportSheet> sheets, Document doc)
         {
-            var t = new Transaction(doc, "Remove Underlays");
-            t.Start();
-            foreach (SCaddins.ExportManager.ExportSheet sheet in sheets) {
-                foreach (ElementId id in sheet.Sheet.GetAllPlacedViews()) {
-                    var v = (View)doc.GetElement(id);
-                    RemoveUnderlay(v);
-                } 
+            if (sheets == null || doc == null) {
+                TaskDialog.Show("Failure", "Could not remove underlays");
+                return;
             }
-            t.Commit();            
+            using (Transaction t = new Transaction(doc)) {
+                if (t.Start("Remove Underlays") == TransactionStatus.Started) {
+                    foreach (SCaddins.ExportManager.ExportSheet sheet in sheets) {
+                        foreach (ElementId id in sheet.Sheet.GetAllPlacedViews()) {
+                            var v = (View)doc.GetElement(id);
+                            RemoveUnderlay(v);
+                        }
+                    }
+                    if (t.Commit() != TransactionStatus.Committed) {
+                        TaskDialog.Show("Failure", "Could not remove underlays");
+                    }
+                }
+            }
         }
         
         public static void RemoveUnderlays(UIDocument uidoc)
         {
+            if (uidoc == null) {
+                TaskDialog.Show("Failure", "Could not remove underlays");
+                return;
+            }
             var selection = uidoc.Selection;
             if (selection.GetElementIds().Count < 1) {
                 return;
             }
-            var t = new Transaction(uidoc.Document);
-            t.Start("Remove Underlays");
-            foreach (ElementId id in selection.GetElementIds()) {
-                RemoveUnderlay(uidoc.Document.GetElement(id));
+            using (Transaction t = new Transaction(uidoc.Document)) {
+                if (t.Start("Remove Underlays") == TransactionStatus.Started) {
+                    foreach (ElementId id in selection.GetElementIds()) {
+                        RemoveUnderlay(uidoc.Document.GetElement(id));
+                    }
+                    if (t.Commit() != TransactionStatus.Committed) {
+                        TaskDialog.Show("Failure", "Could not remove underlays");
+                    }
+                }
             }
-            t.Commit();
         }
         
         private static void RemoveUnderlay(Element element)
         {
             if (element.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Views) {
-                #if REVIT2016 || REVIT2017
                 var param = element.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID);
                 if (param != null) {
                     param.Set(ElementId.InvalidElementId);
                 }
-                #else
-                var param = element.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_ID);
-                if (param != null) {
-                    param.Set(ElementId.InvalidElementId);
-                }
-                #endif
             }   
         }     
     }

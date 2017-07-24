@@ -28,11 +28,16 @@ namespace SCaddins.ExportManager
 
     public class OpenSheet : IExternalCommand
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public Autodesk.Revit.UI.Result Execute(
             ExternalCommandData commandData,
             ref string message,
             Autodesk.Revit.DB.ElementSet elements)
         {
+            if (commandData == null) {
+                return Autodesk.Revit.UI.Result.Failed;
+            }
+
             Document doc = commandData.Application.ActiveUIDocument.Document;
             DialogHandler.AddRevitDialogHandler(commandData.Application);
 

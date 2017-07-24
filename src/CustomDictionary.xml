@@ -2,10 +2,19 @@
 <Dictionary>
      <Words>
         <Recognized>
+            <Word>desc</Word>
+            <Word>dialog</Word>
             <Word>scx</Word>
+            <Word>dwg</Word>
+            <Word>xls</Word>
             <Word>uidoc</Word>
+            <Word>SC-Survey_Point</Word>
+            <Word>SC-SurveyPoint</Word>
             <Word>s</Word>
             <Word>udoc</Word>
+            <Word>milti</Word>
+            <Word>scexport</Word>
+            <Word>saddins</Word>
             <Word>cexport</Word>
             <Word>caos</Word>
             <Word>cam</Word>
@@ -15,15 +24,19 @@
             <Word>ched</Word>
             <Word>Sched</Word>
             <Word>cincrement</Word>
+            <Word>scincrement</Word>
             <Word>cuv</Word>
             <Word>culcase</Word>
+            <Word>sculcase</Word>
             <Word>cunderlay</Word>
+            <Word>scunderlay</Word>
             <Word>changelog</Word>
             <Word>cwash</Word>
             <Word>cwm</Word>
             <Word>acad</Word>
             <Word>revit</Word>
             <Word>ghostscript</Word>
+            <Word>infodialog</Word>
             <Word>underlay</Word>
             <Word>underlays</Word>
             <Word>unjoiner</Word>

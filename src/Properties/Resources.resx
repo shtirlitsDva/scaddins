@@ -1,0 +1,672 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>Check For Updates</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Go" xml:space="preserve">
+    <value>Go</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="InstalledVersion" xml:space="preserve">
+    <value>Installed Version</value>
+  </data>
+  <data name="Interval" xml:space="preserve">
+    <value>Interval</value>
+  </data>
+  <data name="LatestVersion" xml:space="preserve">
+    <value>Latest Version</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ProductName" xml:space="preserve">
+    <value>Product Name</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="RoomToolsBulkRename" xml:space="preserve">
+    <value>Bulk rename selected items in the list above.</value>
+  </data>
+  <data name="RoomToolsCreateMasseRadio" xml:space="preserve">
+    <value>Create Masses from Rooms</value>
+  </data>
+  <data name="RoomToolsCreateMasses" xml:space="preserve">
+    <value>Create Masses</value>
+  </data>
+  <data name="RoomToolsCreatePlansAndSheets" xml:space="preserve">
+    <value>Create Plans and Sheets</value>
+  </data>
+  <data name="RoomToolsCreatePlansRadio" xml:space="preserve">
+    <value>Create Plans and Sheets from Rooms</value>
+  </data>
+  <data name="RoomToolsFilterRoomList" xml:space="preserve">
+    <value>Filter the room list(above) by selected parameter values.</value>
+  </data>
+  <data name="RoomToolsNewPlanName" xml:space="preserve">
+    <value>New Plan Name</value>
+  </data>
+  <data name="RoomToolsNewSheetName" xml:space="preserve">
+    <value>NewSheetName</value>
+  </data>
+  <data name="RoomToolsNewSheetNumber" xml:space="preserve">
+    <value>New Sheet Number</value>
+  </data>
+  <data name="RoomToolsRoomName" xml:space="preserve">
+    <value>Room Name</value>
+  </data>
+  <data name="RoomToolsRoomNumber" xml:space="preserve">
+    <value>Room Number</value>
+  </data>
+  <data name="RoomToolsSync" xml:space="preserve">
+    <value>Sync Masses to Rooms</value>
+  </data>
+  <data name="RoomTools" xml:space="preserve">
+    <value>Room Tools</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="SelectNone" xml:space="preserve">
+    <value>Select None</value>
+  </data>
+  <data name="SourceCode" xml:space="preserve">
+    <value>Source Code</value>
+  </data>
+  <data name="Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
+  <data name="DestructivePurgeDeleteSelected" xml:space="preserve">
+    <value>Delete Selected</value>
+  </data>
+  <data name="DestructivePurgeShowElement" xml:space="preserve">
+    <value>Show Element</value>
+  </data>
+  <data name="AlwyasConfirmFileOverwrite" xml:space="preserve">
+    <value>Always ask for confirmation before overwriting?</value>
+  </data>
+  <data name="DestructivePurgeShowAdditionalInfo" xml:space="preserve">
+    <value>Select an item to show additional information</value>
+  </data>
+  <data name="DotDotDot" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="ExportComplete" xml:space="preserve">
+    <value>Export Complete</value>
+  </data>
+  <data name="ExportStarted" xml:space="preserve">
+    <value>Export Started</value>
+  </data>
+  <data name="Filename" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="FinishedPrint" xml:space="preserve">
+    <value>Finished Print</value>
+  </data>
+  <data name="LogDialogExportsAttempted" xml:space="preserve">
+    <value>Exports attempted with</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Output" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="StartingPrint" xml:space="preserve">
+    <value>Starting Print</value>
+  </data>
+  <data name="UpdateViewChangeLog" xml:space="preserve">
+    <value>View Complete Change Log</value>
+  </data>
+  <data name="UpgradeUpToDateMessage" xml:space="preserve">
+    <value>SCaddins is up to date. Nice one.</value>
+  </data>
+  <data name="UpgrateNewVersionAvailableMessage" xml:space="preserve">
+    <value>New Version Available!. Click Download (go on, you can do it)</value>
+  </data>
+  <data name="UpgrateVersionCheckErrorMessage" xml:space="preserve">
+    <value>Error checking installed version</value>
+  </data>
+  <data name="Warnings" xml:space="preserve">
+    <value>Warnings</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="SolarViewsCreateMultipleShadowPlans" xml:space="preserve">
+    <value>Create Multiple Shadow Plans</value>
+  </data>
+  <data name="SolarViewsCreateMultipleSunViews" xml:space="preserve">
+    <value>Create Multiple Angle of Sun Views (3d)</value>
+  </data>
+  <data name="SolarViewsRotateCurrentView" xml:space="preserve">
+    <value>Rotate Current View</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="AddRevision" xml:space="preserve">
+    <value>Add Revision</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="MessageApplyingPrintSetting" xml:space="preserve">
+    <value>Applying print setting: </value>
+  </data>
+  <data name="CopySheets" xml:space="preserve">
+    <value>Copy Sheets</value>
+  </data>
+  <data name="CreateUserViews" xml:space="preserve">
+    <value>Create User Views</value>
+  </data>
+  <data name="ExportLogInitializationError" xml:space="preserve">
+    <value>Error initializing export log</value>
+  </data>
+  <data name="ExportManagerPrintA2Fit" xml:space="preserve">
+    <value>Print A2 (scale to fit)</value>
+  </data>
+  <data name="ExportManagerPrintA3Fit" xml:space="preserve">
+    <value>Print A3 (scale to fit)</value>
+  </data>
+  <data name="ExportManagerPrintFullSize" xml:space="preserve">
+    <value>Print Full Size</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="KeyboardShortcuts" xml:space="preserve">
+    <value>Keyboard Shortcuts</value>
+  </data>
+  <data name="NorthPointVisibility" xml:space="preserve">
+    <value>North Point Visibility</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="PostscriptPrinterName" xml:space="preserve">
+    <value>Postscript printer name</value>
+  </data>
+  <data name="RemoveUnderlaysfromViews" xml:space="preserve">
+    <value>Remove Underlays from Views</value>
+  </data>
+  <data name="RenameSelectedSheets" xml:space="preserve">
+    <value>Rename Selected Sheets</value>
+  </data>
+  <data name="ResetToDefault" xml:space="preserve">
+    <value>Reset to Default</value>
+  </data>
+  <data name="VerifySheets" xml:space="preserve">
+    <value>Verify Sheets</value>
+  </data>
+  <data name="ExportDirectory" xml:space="preserve">
+    <value>Export Directory</value>
+  </data>
+  <data name="ExportName" xml:space="preserve">
+    <value>Export Name</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NorthPoint" xml:space="preserve">
+    <value>North Point</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="PrintSetting" xml:space="preserve">
+    <value>Print Setting</value>
+  </data>
+  <data name="Revision" xml:space="preserve">
+    <value>Revision</value>
+  </data>
+  <data name="RevisionDate" xml:space="preserve">
+    <value>Revision Date</value>
+  </data>
+  <data name="RevisionDescription" xml:space="preserve">
+    <value>Revision Description</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="CreateUserView" xml:space="preserve">
+    <value>Create User View</value>
+  </data>
+  <data name="OpenSheet" xml:space="preserve">
+    <value>Open Sheet</value>
+  </data>
+  <data name="SheetNumber" xml:space="preserve">
+    <value>Sheet Number</value>
+  </data>
+  <data name="ApplyPrintSettings" xml:space="preserve">
+    <value>Apply Print Settings</value>
+  </data>
+  <data name="ErrorRetrievingRevitPrintSettingsFAILED" xml:space="preserve">
+    <value>Retrieving Revit Print Settings FAILED</value>
+  </data>
+  <data name="MessageAttemptingToLoadRevitPrintSettings" xml:space="preserve">
+    <value>Attempting to Load Revit Print Settings: </value>
+  </data>
+  <data name="SetPrinter" xml:space="preserve">
+    <value>Set Printer</value>
+  </data>
+  <data name="CouldNotCreateUserView" xml:space="preserve">
+    <value>Could not create user view</value>
+  </data>
+  <data name="FilterRevisionColumnPrefix" xml:space="preserve">
+    <value>Filter: Rev *</value>
+  </data>
+  <data name="FilterRevisionDateColumnPrefix" xml:space="preserve">
+    <value>Filter: Rev Date*</value>
+  </data>
+  <data name="FilterStartsWithPrefix" xml:space="preserve">
+    <value>Filter: Starts with *</value>
+  </data>
+  <data name="FindToolTipText" xml:space="preserve">
+    <value>Use regular expressions to filter the sheetlist. Searches both sheet name and number.</value>
+  </data>
+  <data name="NA" xml:space="preserve">
+    <value>NA</value>
+  </data>
+  <data name="ExistingName" xml:space="preserve">
+    <value>Existing Name</value>
+  </data>
+  <data name="ExistingNumber" xml:space="preserve">
+    <value>Existing Number</value>
+  </data>
+  <data name="NewName" xml:space="preserve">
+    <value>New Name</value>
+  </data>
+  <data name="NewNumber" xml:space="preserve">
+    <value>New Number</value>
+  </data>
+  <data name="NewSheetCategoryName" xml:space="preserve">
+    <value>New Sheet Category Name</value>
+  </data>
+  <data name="OptionsForMultipleViewCreation" xml:space="preserve">
+    <value>Options for Multiple View Creation</value>
+  </data>
+  <data name="Pattern" xml:space="preserve">
+    <value>Pattern</value>
+  </data>
+  <data name="RegexOptions" xml:space="preserve">
+    <value>Regex Options</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameSheetsUsingRegex" xml:space="preserve">
+    <value>Rename sheets (using regex)</value>
+  </data>
+  <data name="SheetCategoryName" xml:space="preserve">
+    <value>Sheet Category Name</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>Sheet Name</value>
+  </data>
+  <data name="TestRun" xml:space="preserve">
+    <value>Test Run</value>
+  </data>
+  <data name="AddCurrentSheet" xml:space="preserve">
+    <value>Add Current Sheet</value>
+  </data>
+  <data name="NewSheets" xml:space="preserve">
+    <value>New Sheets</value>
+  </data>
+  <data name="ParentSourceViewOfSelection" xml:space="preserve">
+    <value>Parent[Source] View of Selection</value>
+  </data>
+  <data name="RemoveView" xml:space="preserve">
+    <value>Remove View</value>
+  </data>
+  <data name="RenameSheets" xml:space="preserve">
+    <value>Rename Sheets</value>
+  </data>
+  <data name="RenameViews" xml:space="preserve">
+    <value>Rename Views</value>
+  </data>
+  <data name="ErrorCantOverwriteFile" xml:space="preserve">
+    <value>Could not overwrite file, maybe check permissions?</value>
+  </data>
+  <data name="ErrorFailedToAssignPrintSetting" xml:space="preserve">
+    <value>failed to assign print setting: </value>
+  </data>
+  <data name="ErrorFailedToPrint" xml:space="preserve">
+    <value>Failed to print</value>
+  </data>
+  <data name="FileExtensionPDF" xml:space="preserve">
+    <value>.pdf</value>
+  </data>
+  <data name="FileExtensionXML" xml:space="preserve">
+    <value>.xml</value>
+  </data>
+  <data name="MessageApparentlyCompletedSuccessfully" xml:space="preserve">
+    <value>(apparently) completed successfully</value>
+  </data>
+  <data name="MessageCannotSetPrinter" xml:space="preserve">
+    <value>Cannot set printer: </value>
+  </data>
+  <data name="MessageSubmittingPrint" xml:space="preserve">
+    <value>Submitting print...</value>
+  </data>
+  <data name="MessageUsingPrinter" xml:space="preserve">
+    <value>Using printer: </value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value>Attempting to Load Revit Print Settings:</value>
+  </data>
+  <data name="WarningPrintSetupReadOnly" xml:space="preserve">
+    <value>Print Setup is read only!</value>
+  </data>
+  <data name="WarningPDFExportDisabled" xml:space="preserve">
+    <value>PDF export disabled, check settings!!!</value>
+  </data>
+  <data name="FileExtensionPS" xml:space="preserve">
+    <value>.ps</value>
+  </data>
+  <data name="Parameter" xml:space="preserve">
+    <value>Parameter</value>
+  </data>
+  <data name="SelectRevisionCloudToScheduleDeleteOrAssign" xml:space="preserve">
+    <value>Select Revision Cloud To Schedule,Delete or Re-assign</value>
+  </data>
+  <data name="SelectRevisionToSchedule" xml:space="preserve">
+    <value>Select Revision To Schedule</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="AngleOfSun" xml:space="preserve">
+    <value>Angle Of Sun</value>
+  </data>
+  <data name="AngleOfSunLongDescription" xml:space="preserve">
+    <value>...Or create multiple views for winter(June 21) in one go.</value>
+  </data>
+  <data name="AngleOfSunToolTip" xml:space="preserve">
+    <value>Rotate a 3d view to the location of the sun.</value>
+  </data>
+  <data name="AssociatedLevel" xml:space="preserve">
+    <value>Associated Level</value>
+  </data>
+  <data name="ChangeCase" xml:space="preserve">
+    <value>Change Case</value>
+  </data>
+  <data name="ChangeCaseLongDescription" xml:space="preserve">
+    <value>Pre-select text/tags to change a selection. Run with no selection to change the entire project.</value>
+  </data>
+  <data name="ChangeCaseToolTip" xml:space="preserve">
+    <value>Convert text from upper to lower case, or vise-versa</value>
+  </data>
+  <data name="CopyDetailing" xml:space="preserve">
+    <value>Copy Detailing</value>
+  </data>
+  <data name="CopySheetsToolTip" xml:space="preserve">
+    <value>Copy a view sheet and all its content</value>
+  </data>
+  <data name="CreatePerspective" xml:space="preserve">
+    <value>Create Perspective</value>
+  </data>
+  <data name="CreatePerspectiveToolTip" xml:space="preserve">
+    <value>Create a perspective view from the current view (3d or plan).</value>
+  </data>
+  <data name="DestructivePurge" xml:space="preserve">
+    <value>Destructive Purge</value>
+  </data>
+  <data name="DestructivePurgeToolTip" xml:space="preserve">
+    <value>Clean up your model, in a more destructive way than a purge.</value>
+  </data>
+  <data name="IncrementTool" xml:space="preserve">
+    <value>Increment Tool</value>
+  </data>
+  <data name="IncrementToolSettings" xml:space="preserve">
+    <value>Increment Tool Settings</value>
+  </data>
+  <data name="IncrementToolToolTip" xml:space="preserve">
+    <value>Increment room numbers and family marks.</value>
+  </data>
+  <data name="LineofSight" xml:space="preserve">
+    <value>Line of Sight</value>
+  </data>
+  <data name="LineofSightToolTip" xml:space="preserve">
+    <value>Create line of sight details for stadium seating.</value>
+  </data>
+  <data name="OriginalTitle" xml:space="preserve">
+    <value>Original Title</value>
+  </data>
+  <data name="PlaceCoordinate" xml:space="preserve">
+    <value>Place Coordinate</value>
+  </data>
+  <data name="PlaceCoordinateToolTip" xml:space="preserve">
+    <value>Place a family at a specified shared coordinate.</value>
+  </data>
+  <data name="ProposedTitle" xml:space="preserve">
+    <value>Proposed Title</value>
+  </data>
+  <data name="RoomToolsToolTip" xml:space="preserve">
+    <value>Creates sheets and/or solids(masses) from a selection of rooms.</value>
+  </data>
+  <data name="SCexport" xml:space="preserve">
+    <value>SCexport</value>
+  </data>
+  <data name="SCexportLongDescription" xml:space="preserve">
+    <value>SCexport will export file[s] using the internal Revit revision for each sheet, and a predefined naming scheme.</value>
+  </data>
+  <data name="SCexportToolTip" xml:space="preserve">
+    <value>Export PDF/DWG file[s] with pre defined naming standards</value>
+  </data>
+  <data name="ScheduleClouds" xml:space="preserve">
+    <value>Schedule Clouds</value>
+  </data>
+  <data name="ScheduleCloudsToolTip" xml:space="preserve">
+    <value>Schedule revision clouds and/or re-assign revisions to them.</value>
+  </data>
+  <data name="SheetCategory" xml:space="preserve">
+    <value>Sheet Category</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="UserView" xml:space="preserve">
+    <value>User View</value>
+  </data>
+  <data name="UserViewToolTip" xml:space="preserve">
+    <value>Create a user view.</value>
+  </data>
+  <data name="ViewTemplate" xml:space="preserve">
+    <value>View Template</value>
+  </data>
+  <data name="ViewType" xml:space="preserve">
+    <value>View Type</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="FileExtensionDWG" xml:space="preserve">
+    <value>.dwg</value>
+  </data>
+  <data name="MessageAssigningExportOptions" xml:space="preserve">
+    <value>Assigning export options: </value>
+  </data>
+  <data name="MessageAttemptingToHideTitleBlock" xml:space="preserve">
+    <value>Attempting to hide Title Block (temporarily)</value>
+  </data>
+  <data name="MessageCouldNotApplyPrintSettings" xml:space="preserve">
+    <value>Could not apply print settings</value>
+  </data>
+  <data name="MessageExportingToDirectory" xml:space="preserve">
+    <value>Exporting to directory: </value>
+  </data>
+  <data name="MessageExportingToFileName" xml:space="preserve">
+    <value>Exporting to file name: </value>
+  </data>
+  <data name="MessageShowingTitleBlock" xml:space="preserve">
+    <value>Showing Title Block</value>
+  </data>
+  <data name="MessageStartingDWGExport" xml:space="preserve">
+    <value>### Starting DWG Export ###</value>
+  </data>
+  <data name="MessageStartingGhostscriptPDFExport" xml:space="preserve">
+    <value>### Starting Ghostscript PDF Export ###</value>
+  </data>
+  <data name="MessageUnableToOverwriteExistingFile" xml:space="preserve">
+    <value>Unable to overwrite existing file: </value>
+  </data>
+  <data name="SpacerHyphen" xml:space="preserve">
+    <value> - </value>
+  </data>
+</root>

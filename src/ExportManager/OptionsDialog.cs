@@ -39,10 +39,11 @@ namespace SCaddins.ExportManager
 
         private static void SetPrinter(TextBox textBox)
         {
-            var dialog = new SelectPrinterDialog();
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK) {
-                textBox.Text = dialog.comboBoxPrinter.SelectedItem.ToString();
+            using (var dialog = new SelectPrinterDialog()) {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK) {
+                    textBox.Text = dialog.comboBoxPrinter.SelectedItem.ToString();
+                }
             }
         }
 
@@ -66,8 +67,8 @@ namespace SCaddins.ExportManager
             this.textBoxNorthPointVisibilty.Text = SCaddins.ExportManager.Settings1.Default.NorthPointVisibilityParameter;
             this.textBoxAdobeDriver.Text = this.scx.PdfPrinterName;
             this.textBoxPSPrinter.Text = this.scx.PostscriptPrinterName;
-            this.textBoxGSBin.Text = this.scx.GhostscriptBinDir;
-            this.textBoxGSLib.Text = this.scx.GhostscriptLibDir;
+            this.textBoxGSBin.Text = this.scx.GhostscriptBinDirectory;
+            this.textBoxGSLib.Text = this.scx.GhostscriptLibDirectory;
             this.textBoxA3Printer.Text = this.scx.PrinterNameA3;
             this.textBoxLargeFormatPrinter.Text = this.scx.PrinterNameLargeFormat;
             textBoxTextEditor.Text = SCaddins.ExportManager.Settings1.Default.TextEditor;
@@ -77,20 +78,20 @@ namespace SCaddins.ExportManager
 
         private void SaveValues()
         {
-            this.scx.GhostscriptBinDir = textBoxGSBin.Text;
-            this.scx.GhostscriptLibDir = textBoxGSLib.Text;
+            this.scx.GhostscriptBinDirectory = textBoxGSBin.Text;
+            this.scx.GhostscriptLibDirectory = textBoxGSLib.Text;
             this.scx.PrinterNameA3 = textBoxA3Printer.Text;
             this.scx.PostscriptPrinterName = textBoxPSPrinter.Text;
             this.scx.PdfPrinterName = textBoxAdobeDriver.Text;
             this.scx.PrinterNameLargeFormat = textBoxLargeFormatPrinter.Text;
             this.scx.ShowExportLog = this.checkBoxShowExportLog.Checked;
-            this.scx.ExportDir = this.textBoxExportDir.Text;
-            SCaddins.ExportManager.Settings1.Default.GSBinDirectory = this.scx.GhostscriptBinDir;
+            this.scx.ExportDirectory = this.textBoxExportDir.Text;
+            SCaddins.ExportManager.Settings1.Default.GSBinDirectory = this.scx.GhostscriptBinDirectory;
             SCaddins.ExportManager.Settings1.Default.AdobePrinterDriver = this.scx.PdfPrinterName;
             SCaddins.ExportManager.Settings1.Default.A3PrinterDriver = this.scx.PrinterNameA3;
             SCaddins.ExportManager.Settings1.Default.LargeFormatPrinterDriver = this.scx.PrinterNameLargeFormat;
             SCaddins.ExportManager.Settings1.Default.PSPrinterDriver = this.scx.PostscriptPrinterName;
-            SCaddins.ExportManager.Settings1.Default.GSLibDirectory = this.scx.GhostscriptLibDir;
+            SCaddins.ExportManager.Settings1.Default.GSLibDirectory = this.scx.GhostscriptLibDirectory;
             SCaddins.ExportManager.Settings1.Default.TextEditor = textBoxTextEditor.Text;
             SCaddins.ExportManager.Settings1.Default.ExportDir = this.textBoxExportDir.Text;
             SCaddins.ExportManager.Settings1.Default.AdobePDFMode = radioPDF.Checked;
@@ -105,10 +106,6 @@ namespace SCaddins.ExportManager
 
         private void AssignDWGReleaseMenuTags()
         {
-                #if (!REVIT2016 && !REVIT2017)
-                this.comboBoxAutocadVersion.Items.Add("R2000");
-                this.comboBoxAutocadVersion.Items.Add("R2004");
-                #endif
                 this.comboBoxAutocadVersion.Items.Add("R2007");
                 this.comboBoxAutocadVersion.Items.Add("R2010");
                 this.comboBoxAutocadVersion.Items.Add("R2013");
@@ -130,7 +127,7 @@ namespace SCaddins.ExportManager
 
             if (!this.radioPDF.Enabled && !this.radioGSPDF.Enabled) {
                 this.checkBox1.Enabled = false;
-                this.checkBox1.Text = "PDF disabled, check settings!!!";
+                this.checkBox1.Text = SCaddins.Properties.Resources.WarningPDFExportDisabled;
             }
             if (!FileUtilities.ConfigFileExists(this.doc)) {
                 this.buttonEditConfig.Enabled = false;

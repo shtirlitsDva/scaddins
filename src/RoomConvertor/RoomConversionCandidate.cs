@@ -20,10 +20,9 @@ namespace SCaddins.RoomConvertor
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Linq;
+    using System.Globalization;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.DB.Architecture;
-    using System.Globalization;
 
     public class RoomConversionCandidate : INotifyPropertyChanged
     {
@@ -63,7 +62,7 @@ namespace SCaddins.RoomConvertor
                 if (string.IsNullOrWhiteSpace(room.Number)) {
                     return room.Name;
                 } else {
-                    string r = room.Name.Replace(room.Number, "").Trim();
+                    string r = room.Name.Replace(room.Number, string.Empty).Trim();
                     return string.IsNullOrWhiteSpace(r) ? "-" : r;
                 }
             }
@@ -73,6 +72,7 @@ namespace SCaddins.RoomConvertor
             get {
                 return this.destViewName;
             }
+
             set {
                 this.destViewName = value;
                 if (this.PropertyChanged != null) {
@@ -85,6 +85,7 @@ namespace SCaddins.RoomConvertor
             get {
                 return this.destSheetNumber;
             }
+
             set {
                 this.destSheetNumber = value;
                 if (this.PropertyChanged != null) {
@@ -97,6 +98,7 @@ namespace SCaddins.RoomConvertor
             get {
                 return this.destSheetName;
             }
+
             set {
                 this.destSheetName = value;
                 if (this.PropertyChanged != null) {
@@ -107,13 +109,13 @@ namespace SCaddins.RoomConvertor
 
         public bool PassesFilter(RoomFilter filter)
         {
-            return filter.PassesFilter(this.Room);
+            return filter == null ? false : filter.PassesFilter(this.Room);
         }
 
         private string GetDefaultViewName(Dictionary<string, View> existingViews)
         {
             string request = this.Number + " - " + this.Name;
-            if(existingViews.ContainsKey(request)){
+            if (existingViews.ContainsKey(request)) {
                 return request + @"(" + (DateTime.Now.TimeOfDay.Ticks / 100000).ToString(CultureInfo.InvariantCulture) + @")";       
             } else {
                 return request;
@@ -122,14 +124,14 @@ namespace SCaddins.RoomConvertor
 
         private string GetDefaultSheetName()
         {
-            //this is OK, sheets can cave duplicate names
+            // this is OK, sheets can cave duplicate names
             return this.Number + " - " + this.Name;
         }
 
         private string GetDefaultSheetNumber(Dictionary<string, View> existingSheets)
         {
             string request = this.Number;
-            if(existingSheets.ContainsKey(request)){
+            if (existingSheets.ContainsKey(request)) {
                 return request + @"(" + (DateTime.Now.TimeOfDay.Ticks / 100000).ToString(CultureInfo.InvariantCulture) + @")";       
             } else {
                 return request;
@@ -138,4 +140,3 @@ namespace SCaddins.RoomConvertor
     }
 }
 /* vim: set ts=4 sw=4 nu expandtab: */
-

@@ -32,25 +32,32 @@ namespace SCaddins.SheetCopier
             ref string message,
             Autodesk.Revit.DB.ElementSet elements)
         {
+            if (commandData == null) {
+                return Result.Failed;
+            }
+
             Document doc = commandData.Application.ActiveUIDocument.Document;
             SCaddins.ExportManager.DialogHandler.AddRevitDialogHandler(commandData.Application);
         
             Autodesk.Revit.DB.ViewSheet viewSheet = SheetCopierManager.ViewToViewSheet(doc.ActiveView);
             if (viewSheet == null) {
-                TaskDialog td = new TaskDialog("SCopy");
-                td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
-                td.MainInstruction = "The Copy Sheets add-in needs to be started in a sheet view.";
-                // FIXME add sheet selection to SheetCopier
-                td.MainContent = "Please open the sheet you wish to copy before running...";
-                td.Show();
+                using (TaskDialog td = new TaskDialog("SCopy")) {
+                    td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
+                    td.MainInstruction = "The Copy Sheets add-in needs to be started in a sheet view.";
+
+                    // FIXME add sheet selection to SheetCopier
+                    td.MainContent = "Please open the sheet you wish to copy before running...";
+                    td.Show();
+                }
                 return Autodesk.Revit.UI.Result.Failed;    
             }
             var scopy = new SheetCopierManager(commandData.Application.ActiveUIDocument);
-            var form = new MainForm(doc, viewSheet, scopy);
-            form.Enabled = true;
-            System.Windows.Forms.DialogResult result = form.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK) {
-                scopy.CreateSheets();
+            using (var form = new MainForm(doc, viewSheet, scopy)) {
+                form.Enabled = true;
+                System.Windows.Forms.DialogResult result = form.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK) {
+                    scopy.CreateSheets();
+                }
             }
             return Autodesk.Revit.UI.Result.Succeeded;
         }

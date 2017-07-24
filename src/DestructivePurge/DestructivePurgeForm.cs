@@ -1,4 +1,4 @@
-﻿// (C) Copyright 2013-2014 by Andrew Nicholas andrewnicholas@iinet.net.au
+﻿// (C) Copyright 2013-2017 by Andrew Nicholas andrewnicholas@iinet.net.au
 //
 // This file is part of SCaddins.
 //
@@ -25,6 +25,7 @@ namespace SCaddins.SCwash
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
     using Autodesk.Revit.UI.Events;
+    using SCaddins.Properties;
 
     public partial class SCwashForm : System.Windows.Forms.Form
     {
@@ -38,22 +39,36 @@ namespace SCaddins.SCwash
             this.InitializeComponent();
             treeView1.CheckBoxes = true;
             this.Init();
-            textBox1.Text = "Select an item to show additional information";
+            textBox1.Text = Resources.DestructivePurgeShowAdditionalInfo;
         }
 
-        public void CheckAllNodes(TreeNodeCollection nodes)
+        public void CheckAllNodes(TreeNodeCollection nodes, bool check)
         {
-            foreach (TreeNode node in nodes) {
-                node.Checked = true;
-                this.CheckChildren(node, true);
+            if (nodes != null) {
+                foreach (TreeNode node in nodes) {
+                    node.Checked = check;
+                    GreyifyNode(node, false);
+                    CheckAllChildNodes(node, check);
+                }
             }
         }
 
-        public void UncheckAllNodes(TreeNodeCollection nodes)
+        private static void GreyifyNode(TreeNode node, bool grey) {
+            if (grey) {
+                node.ForeColor = System.Drawing.Color.LightGray;
+            } else {
+                node.ForeColor = System.Drawing.Color.Black;
+            }
+        }
+
+        private void CheckAllChildNodes(TreeNode treeNode, bool nodeChecked)
         {
-            foreach (TreeNode node in nodes) {
-                node.Checked = false;
-                this.CheckChildren(node, false);
+            foreach (TreeNode node in treeNode.Nodes) {
+                node.Checked = nodeChecked;
+                GreyifyNode(node, false);
+                if (node.Nodes.Count > 0) {
+                    this.CheckAllChildNodes(node, nodeChecked);
+                }
             }
         }
 
@@ -84,33 +99,25 @@ namespace SCaddins.SCwash
                 var t = (SCwashTreeNode)treeView1.SelectedNode;
                 textBox1.Text = t.Info;
                 if (t.Id != null) {
-                    btnShowElement.Text = "Show" + System.Environment.NewLine + t.Id.ToString();
+                    btnShowElement.Text = Resources.Show + System.Environment.NewLine + t.Id.ToString();
                     btnShowElement.Enabled = true;
                 } else {
-                    btnShowElement.Text = "Show Element";
+                    btnShowElement.Text = Resources.DestructivePurgeShowElement;
                     btnShowElement.Enabled = false;
                 }
             } else {
-                textBox1.Text = "Select an item to show additional information";
-            }
-        }
-
-        private void CheckChildren(TreeNode rootNode, bool selected)
-        {
-            foreach (TreeNode node in rootNode.Nodes) {
-                this.CheckChildren(node, selected);
-                node.Checked = selected;
+                textBox1.Text = Resources.DestructivePurgeShowAdditionalInfo;
             }
         }
 
         private void BtnSelectAll_Click(object sender, EventArgs e)
         {
-            this.CheckAllNodes(treeView1.Nodes);
+            this.CheckAllNodes(treeView1.Nodes, true);
         }
 
         private void BtnSelectNone_Click(object sender, EventArgs e)
         {
-            this.UncheckAllNodes(treeView1.Nodes);
+            this.CheckAllNodes(treeView1.Nodes, false);
         }
 
         private void BtnDelete_Click(object sender, EventArgs e)
@@ -127,18 +134,19 @@ namespace SCaddins.SCwash
 
             // Un-mark the first revision because you can't delete them all.
             if (revisionsToStay == 0) {
-                TaskDialog td = new TaskDialog("One last revision");
-                td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
-                td.MainInstruction = "The project must have at least one revision!";
-                td.MainContent = "Press OK for SCwash will keep the first revision for you." + System.Environment.NewLine +
-                    System.Environment.NewLine +
-                    "Press Cancel to select the revision you want to keep.";
-                td.CommonButtons = TaskDialogCommonButtons.Cancel | TaskDialogCommonButtons.Ok;
-                TaskDialogResult tr = td.Show();
-                if (tr == TaskDialogResult.Cancel) {
-                    return;
+                using (TaskDialog td = new TaskDialog("One last revision")) {
+                    td.MainIcon = TaskDialogIcon.TaskDialogIconWarning;
+                    td.MainInstruction = "The project must have at least one revision!";
+                    td.MainContent = "Press OK for SCwash will keep the first revision for you." + System.Environment.NewLine +
+                        System.Environment.NewLine +
+                        "Press Cancel to select the revision you want to keep.";
+                    td.CommonButtons = TaskDialogCommonButtons.Cancel | TaskDialogCommonButtons.Ok;
+                    TaskDialogResult tr = td.Show();
+                    if (tr == TaskDialogResult.Cancel) {
+                        return;
+                    }
+                    treeView1.Nodes[7].Nodes[0].Checked = false;
                 }
-                treeView1.Nodes[7].Nodes[0].Checked = false;    
             }
 
             ICollection<ElementId> elements = new List<ElementId>();
@@ -162,24 +170,43 @@ namespace SCaddins.SCwash
                 }
             }
         }
+       
+        private void GreyMultiTypeParents(SCwashTreeNode parent)
+        {
+            if (parent == null) {
+                return;
+            }
+            int childrenChecked = 0;
+            bool childGrey = false;
+            foreach (SCwashTreeNode child in parent.Nodes) {
+                if (child.Checked) {
+                    childrenChecked++;
+                }
+                if (child.ForeColor == System.Drawing.Color.LightGray) {
+                    childGrey = true;
+                }
+            }
+            if (childrenChecked > 0) {
+                parent.Checked = true;
+            }
+            if (childrenChecked == 0) {
+                parent.Checked = false;
+            }
+            bool grey = (((childrenChecked > 0) && !parent.Checked) || ((childrenChecked < parent.Nodes.Count) && parent.Checked)) || childGrey;
+            GreyifyNode(parent, grey);
+            if (parent.Parent != null) {
+                GreyMultiTypeParents((SCwashTreeNode)parent.Parent);
+            }
+        }
 
         private void TreeView1_AfterCheck(object sender, TreeViewEventArgs e)
         {
-            SCwashTreeNode tn = e.Node as SCwashTreeNode;
-            foreach (SCwashTreeNode child in tn.Nodes) {
-                if (!tn.Checked) {
-                    child.ForeColor = System.Drawing.Color.LightGray;
-                }
-                if (tn.Checked) {
-                    child.ForeColor = System.Drawing.Color.Black;
-                }
-                foreach (SCwashTreeNode child2 in child.Nodes) {
-                    if (!tn.Checked) {
-                        child2.ForeColor = System.Drawing.Color.LightGray;
-                    }
-                    if (tn.Checked) {
-                        child2.ForeColor = System.Drawing.Color.Black;
-                    }
+            if (e.Action != TreeViewAction.Unknown) {
+                SCwashTreeNode tn = e.Node as SCwashTreeNode;
+                GreyifyNode(tn, false);
+                CheckAllChildNodes(tn, tn.Checked);
+                if (tn.Parent != null) {
+                    GreyMultiTypeParents((SCwashTreeNode)tn.Parent);
                 }
             }
         }
@@ -191,19 +218,18 @@ namespace SCaddins.SCwash
 
         private void BtnShowElement_Click(object sender, EventArgs e)
         {
-            // open view with selected id.
-            UIApplication uiapp = new UIApplication(this.udoc.Application.Application);
-            uiapp.DialogBoxShowing += new EventHandler<DialogBoxShowingEventArgs>(this.DismissOpenQuestion);
-            SCwashTreeNode t = (SCwashTreeNode)treeView1.SelectedNode;
-            if (t.Id != null) {
-                this.udoc.ShowElements(t.Id);
+            using (UIApplication uiapp = new UIApplication(this.udoc.Application.Application)) {
+                uiapp.DialogBoxShowing += new EventHandler<DialogBoxShowingEventArgs>(this.DismissOpenQuestion);
+                SCwashTreeNode t = (SCwashTreeNode)treeView1.SelectedNode;
+                if (t.Id != null) {
+                    this.udoc.ShowElements(t.Id);
+                }
             }
         }
 
         private void DismissOpenQuestion(object o, DialogBoxShowingEventArgs e)
         {
             TaskDialogShowingEventArgs t = e as TaskDialogShowingEventArgs;
-            Debug.Print(t.Message);
             if (t != null && t.Message == "There is no open view that shows any of the highlighted elements.  Searching through the closed views to find a good view could take a long time.  Continue?") {
                 e.OverrideResult((int)TaskDialogResult.Ok);
             }

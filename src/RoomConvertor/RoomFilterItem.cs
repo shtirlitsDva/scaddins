@@ -23,10 +23,10 @@ namespace SCaddins.RoomConvertor
 
     public class RoomFilterItem
     {
-       LogicalOperator lo;
-       ComparisonOperator co;
-       string parameterName;
-       string test;
+       private LogicalOperator lo;
+       private ComparisonOperator co;
+       private string parameterName;
+       private string test;
 
         public RoomFilterItem(string lo, string co, string parameter, string test)
         {
@@ -43,7 +43,7 @@ namespace SCaddins.RoomConvertor
 
         private static Parameter ParamFromString(Room room, string name)
         {
-            if(room.GetParameters(name).Count > 0) {
+            if (room.GetParameters(name).Count > 0) {
                 return room.GetParameters(name)[0];
             }
             return null;
@@ -51,10 +51,10 @@ namespace SCaddins.RoomConvertor
         
         private static bool ParameterValueContainsString(Parameter param, string value)
         {
-            if (!param.HasValue || string.IsNullOrWhiteSpace(value)){
+            if (!param.HasValue || string.IsNullOrWhiteSpace(value)) {
                 return false;
             }
-            switch (param.StorageType){
+            switch (param.StorageType) {
                 case StorageType.Double:
                         return false;
                 case StorageType.String:
@@ -71,26 +71,21 @@ namespace SCaddins.RoomConvertor
         private static int ParameterComparedToString(Parameter param, string value)
         {
             const int result = 441976;
-            if (!param.HasValue || string.IsNullOrWhiteSpace(value)){
+            if (!param.HasValue || string.IsNullOrWhiteSpace(value)) {
                 return result;
             }
-            switch (param.StorageType){
+            switch (param.StorageType) {
                 case StorageType.Double:
                     double parse;
-                    if (Double.TryParse(value, out parse)){
+                    if (double.TryParse(value, out parse)) {
                         return param.AsDouble().CompareTo(parse);
                     } 
                     break;
                 case StorageType.String:
-                    //int sparse, sparse2;
-                    //if (Int32.TryParse(value, out sparse) && Int32.TryParse(param.AsValueString(), out sparse2)){
-                    //       return sparse2.CompareTo(sparse);
-                    //} else {
                     return param.AsString().Equals(value) ? 0 : result;
-                    //}
                 case StorageType.Integer:
                     int iparse;
-                    if (Int32.TryParse(value, out iparse)){
+                    if (int.TryParse(value, out iparse)) {
                            return param.AsInteger().CompareTo(iparse);
                     }
                     break;
@@ -105,7 +100,7 @@ namespace SCaddins.RoomConvertor
         public bool PassesFilter(Room room)
         {
             // FIXME add OR oprion one day.
-            if (lo != LogicalOperator.And){
+            if (lo != LogicalOperator.And) {
                 return false;
             }
             
@@ -114,14 +109,6 @@ namespace SCaddins.RoomConvertor
                 return false;
             }
             
-            //if (this.parameterName == "Level") {
-            //    Document doc = room.Document;
-            //    var test = param.AsValueString();
-            //    Autodesk.Revit.UI.TaskDialog.Show("Level Check", this.parameterName + " - " + test);
-            //    return true;
-            //    //return ParameterEqualsLevel(test, room);
-            //}
-
             if (co == ComparisonOperator.Contains) {
                 return ParameterValueContainsString(param, test);
             }
@@ -144,4 +131,3 @@ namespace SCaddins.RoomConvertor
     }
 }
 /* vim: set ts=4 sw=4 nu expandtab: */
-

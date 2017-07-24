@@ -21,6 +21,7 @@ namespace SCaddins.RevisionUtilities
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Reflection;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
@@ -35,13 +36,16 @@ namespace SCaddins.RevisionUtilities
         [SuppressMessage("Microsoft.Performance", "CA1814:PreferJaggedArraysOverMultidimensional", Justification = "Because.")]        
         public static void ExportCloudInfo(Document doc, Dictionary<string, RevisionItem> dictionary, string exportFilename)
         {
+            if (doc == null || dictionary == null) {
+                TaskDialog.Show("ERROR", "could not export cloud information");
+                return;
+            }
 
-            string ExportFilename = exportFilename != string.Empty ? exportFilename : @"C:\Temp\SClouds";
+            string ExportFilename = string.IsNullOrEmpty(exportFilename) ? @"C:\Temp\SClouds" : exportFilename;
             Application excelApp;
             Worksheet excelWorksheet;
             Workbook excelWorkbook;
 
-            // FIXME this seems broken.
             excelApp = new Application();
             excelApp.Visible = false;
             excelWorkbook = (Workbook)excelApp.Workbooks.Add(Missing.Value);
@@ -71,7 +75,7 @@ namespace SCaddins.RevisionUtilities
                     data[cloudNumber, 4] = revCloud.Comments;
                     data[cloudNumber, 5] = revCloud.Date;
                     data[cloudNumber, 6] = revCloud.Description;
-                    data[cloudNumber, 7] = revCloud.Id.IntegerValue.ToString();
+                    data[cloudNumber, 7] = revCloud.Id.IntegerValue.ToString(CultureInfo.InvariantCulture);
                 }
             }
 
@@ -84,17 +88,18 @@ namespace SCaddins.RevisionUtilities
                 excelWorkbook.Close();
             }
         }
-        
-        
+                
         public static SortableBindingListCollection<RevisionCloudItem> GetRevisionClouds(Document doc)
         {
             var revisionClouds = new SortableBindingListCollection<RevisionCloudItem>();
-            FilteredElementCollector a;
-            a = new FilteredElementCollector(doc);
-            a.OfCategory(BuiltInCategory.OST_RevisionClouds);
-            a.OfClass(typeof(RevisionCloud));
-            foreach (RevisionCloud e in a) {  
-                revisionClouds.Add(new RevisionCloudItem(doc, e));
+            if (doc != null) {
+                using (FilteredElementCollector a = new FilteredElementCollector(doc)) {
+                    a.OfCategory(BuiltInCategory.OST_RevisionClouds);
+                    a.OfClass(typeof(RevisionCloud));
+                    foreach (RevisionCloud e in a) {
+                        revisionClouds.Add(new RevisionCloudItem(doc, e));
+                    }
+                }
             }
             return revisionClouds;
         }
@@ -102,12 +107,12 @@ namespace SCaddins.RevisionUtilities
         public static SortableBindingListCollection<RevisionItem> GetRevisions(Document doc)
         {
             var revisions = new SortableBindingListCollection<RevisionItem>();
-            FilteredElementCollector a;
-            a = new FilteredElementCollector(doc);
-            a.OfCategory(BuiltInCategory.OST_Revisions);
-            foreach (Revision e in a) {  
-                if (e.IsValidObject) {
-                    revisions.Add(new RevisionItem(doc, e));
+            using (var a = new FilteredElementCollector(doc)) {
+                a.OfCategory(BuiltInCategory.OST_Revisions);
+                foreach (Revision e in a) {
+                    if (e.IsValidObject) {
+                        revisions.Add(new RevisionItem(e));
+                    }
                 }
             }
             return revisions;
@@ -115,20 +120,27 @@ namespace SCaddins.RevisionUtilities
         
         public static void AssignRevisionToClouds(Document doc, Collection<RevisionCloudItem> revisionClouds)
         {
-            var r = new SCaddins.ExportManager.RevisionSelectionDialog(doc);
-            var result = r.ShowDialog();
-            if (result != System.Windows.Forms.DialogResult.OK) {      
+            if (doc == null || revisionClouds == null) {
+                TaskDialog.Show("ERROR", "Could not assign revisions to clouds");
                 return;
             }
-            if (r.Id == null) {
-                TaskDialog.Show("test", "id is null"); 
+            ElementId cloudId = null;
+            using (var r = new SCaddins.ExportManager.RevisionSelectionDialog(doc)) {
+                var result = r.ShowDialog();
+                if (result != System.Windows.Forms.DialogResult.OK) {
+                    return;
+                }
+                cloudId = r.Id;
+            }
+            if (cloudId == null) {
+                TaskDialog.Show("ERROR", "Selected cloud is not valid...for some reason"); 
                 return;
             }
             using (var t = new Transaction(doc, "Assign Revisions to Clouds")) {
                 t.Start();
                 foreach (RevisionCloudItem rc in revisionClouds) { 
                     if (rc != null) {
-                        rc.SetCloudId(r.Id);
+                        rc.SetCloudId(cloudId);
                     } 
                 }
                 t.Commit();
@@ -137,6 +149,10 @@ namespace SCaddins.RevisionUtilities
         
          public static void DeleteRevisionClouds(Document doc, Collection<RevisionCloudItem> revisionClouds)
         {
+            if (doc == null || revisionClouds == null) {
+                TaskDialog.Show("ERROR", "Could not delete revision clouds");
+                return;
+            }
             using (var t = new Transaction(doc, "Deleting Revision Clouds")) {
                 t.Start();
                 foreach (RevisionCloudItem rc in revisionClouds) { 
@@ -148,17 +164,6 @@ namespace SCaddins.RevisionUtilities
             }
         }
         
-
-        public static string GetParamaterAsString(Element revCloud, BuiltInParameter b)
-        {
-            var p = revCloud.get_Parameter(b);
-            if (p == null) {
-                return string.Empty;
-            }
-            string result = p.AsString();
-            return string.IsNullOrEmpty(result) ? string.Empty : result;
-        }
-
         /// <summary>
         /// Write to an excel worksheet
         /// from here:

@@ -27,6 +27,7 @@ namespace SCaddins.ExportManager
     using System.Windows.Forms;
     using Autodesk.Revit.UI;
     using SCaddins.Common;
+    using SCaddins.Properties;
 
     public partial class MainForm : Form
     {
@@ -35,21 +36,21 @@ namespace SCaddins.ExportManager
         private UIDocument udoc;
         private FilterContextMenu filter;
         private MenuButton printButton;
+        private ToolTip findTip;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public MainForm(UIDocument udoc)
         {
             this.udoc = udoc;
             this.doc = udoc.Document;
             this.scx = new ExportManager(this.doc);
-            this.filter = new FilterContextMenu("Filter", -1, null);
+            this.filter = new FilterContextMenu(Resources.Filter, -1, null);
             this.InitializeComponent();
             this.printButton = new MenuButton(printButtonContextMenu);
             this.InitPrintButton();
             this.Controls.Add(this.printButton);
-            var findTip = new ToolTip();
-            var findTipText = "Use regular expressions to filter the sheet list" +
-                Environment.NewLine +
-                "Searches both sheet name and number.";
+            findTip = new ToolTip();
+            var findTipText = Resources.FindToolTipText;
             findTip.SetToolTip(this.btnFind, findTipText);
             this.dataGridView1.ContextMenuStrip = this.contextMenuStrip1;
             this.PopulateViewSheetSetCombo();
@@ -66,19 +67,20 @@ namespace SCaddins.ExportManager
         public void OpenSelectedViewToolStripMenuItemClick(
                 object sender, EventArgs e)
         {
-            DialogHandler.AddRevitDialogHandler(new UIApplication(this.udoc.Application.Application));
-            foreach (DataGridViewRow row in this.dataGridView1.SelectedRows) {
-                 var sc = row.DataBoundItem as ExportSheet;
-                if (sc == null) {
-                    return;
-                }
-                 Autodesk.Revit.DB.FamilyInstance result =
-                     ExportManager.TitleBlockInstanceFromSheetNumber(sc.SheetNumber, this.doc);
-                if (result != null) {
-                    this.udoc.ShowElements(result);
+            using (var uiapp = new UIApplication(this.udoc.Application.Application)) {
+                DialogHandler.AddRevitDialogHandler(uiapp);
+                foreach (DataGridViewRow row in this.dataGridView1.SelectedRows) {
+                    var sc = row.DataBoundItem as ExportSheet;
+                    if (sc == null) {
+                        return;
+                    }
+                    Autodesk.Revit.DB.FamilyInstance result =
+                        ExportManager.TitleBlockInstanceFromSheetNumber(sc.SheetNumber, this.doc);
+                    if (result != null) {
+                        this.udoc.ShowElements(result);
+                    }
                 }
             }
-
             this.Close();
         }
 
@@ -101,10 +103,11 @@ namespace SCaddins.ExportManager
                 "0-9\t  Filter main view by sheet number" + System.Environment.NewLine + System.Environment.NewLine +
                 "?\t    Help, show keyboard shortcuts (this dialog)" + System.Environment.NewLine +
                 "/\t    Advanced search" + System.Environment.NewLine;
-            var td = new TaskDialog("Keyboard Shortcuts");
-            td.MainInstruction = "Keyboard Shortcuts";
-            td.MainContent = s;
-            td.Show();
+            using (var td = new TaskDialog("Keyboard Shortcuts")) {
+                td.MainInstruction = "Keyboard Shortcuts";
+                td.MainContent = s;
+                td.Show();
+            }
         }
         
         private void InitPrintButton()
@@ -115,7 +118,7 @@ namespace SCaddins.ExportManager
             this.printButton.Name = "btnPrint";
             this.printButton.Size = new System.Drawing.Size(55, 22);
             this.printButton.TabIndex = 13;
-            this.printButton.Text = "Print";
+            this.printButton.Text = Resources.Print;
             this.printButton.UseVisualStyleBackColor = true;
         }
 
@@ -184,6 +187,7 @@ namespace SCaddins.ExportManager
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void AddColumn(string name, string text)
         {
             var result = new DataGridViewTextBoxColumn();
@@ -192,6 +196,7 @@ namespace SCaddins.ExportManager
             this.dataGridView1.Columns.Add(result);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void AddDateColumn(string name, string text)
         {
             var result = new DataGridViewTextBoxColumn();
@@ -206,17 +211,17 @@ namespace SCaddins.ExportManager
         private void PopulateColumns()
         {
             this.dataGridView1.AutoGenerateColumns = false;
-            this.AddColumn("FullExportName", "Export Name");
-            this.AddColumn("SheetNumber", "Number");
-            this.AddColumn("SheetDescription", "Name");
-            this.AddColumn("SheetRevision", "Revision");
-            this.AddColumn("SheetRevisionDescription", "Revision Description");
-            this.AddDateColumn("SheetRevisionDateTime", "Revision Date");
-            this.AddColumn("ExportDir", "Export Dir");
-            this.AddColumn("Scale", "Scale");
-            this.AddColumn("NorthPointVisible", "North Point");
-            this.AddColumn("PageSize", "Page Size");
-            this.AddColumn("PrintSettingName", "Print Setting");
+            this.AddColumn("FullExportName", Resources.ExportName);
+            this.AddColumn("SheetNumber", Resources.Number);
+            this.AddColumn("SheetDescription", Resources.Name);
+            this.AddColumn("SheetRevision", Resources.Revision);
+            this.AddColumn("SheetRevisionDescription", Resources.RevisionDescription);
+            this.AddDateColumn("SheetRevisionDateTime", Resources.RevisionDate);
+            this.AddColumn("ExportDir", Resources.ExportDirectory);
+            this.AddColumn("Scale", Resources.Scale);
+            this.AddColumn("NorthPointVisible", Resources.NorthPoint);
+            this.AddColumn("PageSize", Resources.PageSize);
+            this.AddColumn("PrintSettingName", Resources.PrintSetting);
         }
 
         private List<ExportSheet> SelectedSheets()
@@ -282,7 +287,7 @@ namespace SCaddins.ExportManager
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
             if (result == DialogResult.OK) {
                 this.folderBrowserDialog1.SelectedPath.ToString();
-                this.scx.ExportDir = this.folderBrowserDialog1.SelectedPath;
+                this.scx.ExportDirectory = this.folderBrowserDialog1.SelectedPath;
             }
             this.dataGridView1.Refresh();
         }
@@ -307,6 +312,7 @@ namespace SCaddins.ExportManager
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void MainForm_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!this.searchBox.Visible) {
@@ -362,6 +368,9 @@ namespace SCaddins.ExportManager
                     break;
                 case "T":
                     TaskDialog.Show("Tip Of The Day", TipOfDay.Tip());
+                    break;
+                case "U":
+                    SCaddins.SCaddinsApp.CheckForUpdates(false);
                     break;
                 case "X":
                     this.BtnExport_Click(sender, e);
@@ -449,9 +458,10 @@ namespace SCaddins.ExportManager
             this.UpdateExportButton(this.NumberOfSelectedViews());
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Forms.Control.set_Text(System.String)")]
         private void UpdateExportButton(int count)
         {
-            string s = "Export[" + count + "]:";
+            string s = Resources.Export + @"[" + count + @"]:";
             if (this.scx.HasExportOption(ExportOptions.PDF)) {
                 s += @" " + ExportOptions.PDF.ToString();
             }
@@ -496,8 +506,9 @@ namespace SCaddins.ExportManager
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var ab = new AboutBox1();
-            ab.ShowDialog();
+            using (var ab = new AboutBox1()) {
+                ab.ShowDialog();
+            }
         }
 
         private void HelpToolStripMenuItem_Click(object sender, EventArgs e)
@@ -505,12 +516,12 @@ namespace SCaddins.ExportManager
             ShowHelp();
         }
 
-      private void DataGridView1_CellMouseDown(
+        private void DataGridView1_CellMouseDown(
             object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.RowIndex != -1) {
-                string s = "Filter";
-                string f = "NA";
+                string s = Resources.Filter;
+                string f = Resources.NA;
                 this.filterToolStripMenuItem.Enabled = true;
                 var row = (DataGridViewRow)this.dataGridView1.Rows[e.RowIndex];
                 var sc = row.DataBoundItem as ExportSheet;
@@ -518,10 +529,10 @@ namespace SCaddins.ExportManager
                 case 1:
                     var c =
                         new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-                        f = "Filter: Rev *"; 
+                        f = Resources.FilterRevisionColumnPrefix; 
                     int index = sc.SheetNumber.IndexOfAny(c);
                     if (index > -1) {
-                        f = "Filter: Starts with *"; 
+                        f = Resources.FilterStartsWithPrefix; 
                         this.filter.Update(
                                 f + sc.SheetNumber.Substring(0, index + 1),
                                 1,
@@ -530,13 +541,13 @@ namespace SCaddins.ExportManager
                     }
                     break;
                 case 3:
-                        f = "Filter: Rev *"; 
+                        f = Resources.FilterRevisionColumnPrefix; 
                         this.filter.Update(
                             f + sc.SheetRevision, 3, sc.SheetRevision);
                         s = this.filter.Label;
                         break;
                 case 5:
-                        f = "Filter: Rev Date*"; 
+                        f = Resources.FilterRevisionDateColumnPrefix; 
                         this.filter.Update(
                             f + sc.SheetRevisionDate, 5, sc.SheetRevisionDate);
                         s = this.filter.Label;
@@ -582,6 +593,7 @@ namespace SCaddins.ExportManager
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            findTip.Dispose();
             this.Dispose();
         }
 
@@ -643,8 +655,9 @@ namespace SCaddins.ExportManager
         
         private void ShowOptions()
         {
-            var options = new OptionsDialog(this.doc, this.scx);
-            options.ShowDialog();
+            using (var options = new OptionsDialog(this.doc, this.scx)) {
+                options.ShowDialog();
+            }
             this.UpdateExportButton(this.NumberOfSelectedViews());
             this.dataGridView1.Refresh(); 
         }
@@ -688,14 +701,18 @@ namespace SCaddins.ExportManager
         }
 
         private void CopySheetsToolStripMenuItemClick(object sender, EventArgs e)
-        {          
-            var scopy = new SCaddins.SheetCopier.SheetCopierManager(udoc);            
-            var form  = new SCaddins.SheetCopier.MainForm(doc, SelectedSheets(), scopy);
-            form.Enabled = true;
-            DialogResult result = form.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK) {
-                scopy.CreateSheets();
-            }            
+        {   
+            if (udoc == null) {
+                return;
+            }       
+            var scopy = new SCaddins.SheetCopier.SheetCopierManager(udoc);
+            using (var form = new SCaddins.SheetCopier.MainForm(doc, SelectedSheets(), scopy)) {
+                form.Enabled = true;
+                DialogResult result = form.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK) {
+                    scopy.CreateSheets();
+                }
+            }          
         }
         
         private void Print(string printerName, int scale)
@@ -706,11 +723,11 @@ namespace SCaddins.ExportManager
             Refresh();   
             SetUpPBar(NumberOfSelectedViews());
             scx.Print(SelectedSheets(),
-                           printerName,
-                           scale,
-                           progressBar,
-                           progressInfo,
-                           statusStrip1);   
+                printerName,
+                scale,
+                progressBar,
+                progressInfo,
+                statusStrip1);   
             Close();  // end SCexport     
         }
 

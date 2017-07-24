@@ -41,14 +41,18 @@ namespace SCaddins.ExportManager
             get { return this.name; }
         }
 
-        public static string FormatConfigurationString(SCaddins.ExportManager.ExportSheet sheet, string value, string extension)
+        public static string FormatConfigurationString(ExportSheet sheet, string value, string extension)
         {
+            // FIXME this seems to return string.Empty when not expected.?
+            // if (sheet == null || string.IsNullOrEmpty(value) || string.IsNullOrEmpty(extension)) {
+            //     return string.Empty;
+            // }
             string result = value;
             result = result.Replace(@"$height", sheet.Height.ToString(CultureInfo.InvariantCulture));
             result = result.Replace(@"$width", sheet.Width.ToString(CultureInfo.InvariantCulture));
             result = result.Replace(@"$fullExportName", sheet.FullExportName);
             result = result.Replace(@"$fullExportPath", sheet.FullExportPath(extension));
-            result = result.Replace(@"$exportDir", sheet.ExportDir);
+            result = result.Replace(@"$exportDir", sheet.ExportDirectory);
             result = result.Replace(@"$pageSize", sheet.PageSize);
             result = result.Replace(@"$projectNumber", sheet.ProjectNumber);
             result = result.Replace(@"$sheetDescription", sheet.SheetDescription);
@@ -60,28 +64,19 @@ namespace SCaddins.ExportManager
             return result;
         }
 
-        public void Run(SCaddins.ExportManager.ExportSheet sheet, string extension)
+        public void SetCommand(string command)
         {
-            string a = FormatConfigurationString(sheet, this.args, extension);
-            #if DEBUG
-            Autodesk.Revit.UI.TaskDialog.Show("DEBUG", this.args + " " + a);
-            #endif
-            Common.ConsoleUtilities.StartHiddenConsoleProg(this.cmd, a);
+            this.cmd = command;
         }
 
-        public void SetCommand(string cmd)
+        public void SetArguments(string arguments)
         {
-            this.cmd = cmd;
+            this.args = arguments;
         }
 
-        public void SetArguments(string args)
+        public void SetName(string newName)
         {
-            this.args = args;
-        }
-
-        public void SetName(string name)
-        {
-            this.name = name;
+            this.name = newName;
         }
 
         public void AddSupportedFilenameExtension(string extension)
@@ -107,6 +102,13 @@ namespace SCaddins.ExportManager
                 s += fne + System.Environment.NewLine;
             }
             return s;
+        }
+
+        internal void Run(ExportSheet sheet, string extension) {
+            string a = FormatConfigurationString(sheet, this.args, extension);
+            if (!string.IsNullOrEmpty(a)) {
+                Common.ConsoleUtilities.StartHiddenConsoleProg(this.cmd, a);
+            }
         }
     }
 }

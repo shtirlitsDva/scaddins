@@ -22,18 +22,20 @@ namespace SCaddins.SolarUtilities
 
     public partial class SCaosForm : Form
     {
-        public SCaosForm(string[] informationText, bool currentViewIsIso)
+        public SCaosForm(string[] informationText, bool currentViewIsIsometric)
         {
             this.InitializeComponent();
-            if (!currentViewIsIso) {
+            if (!currentViewIsIsometric) {
                 radioButtonRotateCurrent.Enabled = false;
             }
 
-            for (int i = 0; i < informationText.Length; i++) {
-                listBox1.Items.Add(informationText[i]);
+            if (informationText != null) {
+                for (int i = 0; i < informationText.Length; i++) {
+                    listBox1.Items.Add(informationText[i]);
+                }
             }
 
-            this.PopulateTimeSpansDropDowns(new DateTime(2015, 6, 21, 12, 0, 0, DateTimeKind.Local));
+            this.PopulateTimeSpansDropDowns(new DateTime(2017, 6, 21, 12, 0, 0, DateTimeKind.Local));
 
             interval.Items.Add(new TimeSpan(0, 15, 0));
             interval.Items.Add(new TimeSpan(0, 30, 0));

@@ -39,6 +39,10 @@ namespace SCaddins.ParameterUtils
             ref string message,
             Autodesk.Revit.DB.ElementSet elements)
         {
+            if (commandData == null) {
+                return Result.Failed;
+            }
+
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIApplication application = commandData.Application;
             UIDocument document = application.ActiveUIDocument;
@@ -61,10 +65,12 @@ namespace SCaddins.ParameterUtils
         {
             commit = true;
             EditTextParameters.mode = mode;
-            var trans = new Transaction(doc);
-            trans.Start("Convert all selected types uppercase (SCulcase)");
-            Convert(mode, types, doc);
-            trans.Commit();
+            using (var trans = new Transaction(doc)) {
+                if (trans.Start("Convert all selected types to uppercase (SCulcase)") == TransactionStatus.Started) {
+                    Convert(mode, types, doc);
+                    trans.Commit();
+                }
+            }
         }
 
         public static void ConvertAllDryRun(ConversionMode mode, ConversionTypes types, Document doc)
@@ -72,37 +78,42 @@ namespace SCaddins.ParameterUtils
             commit = false; 
             dryRunLogText = string.Empty;
             Convert(mode, types, doc);
-            var info = new SCulcaseInfoDialog();
-            info.SetText(dryRunLogText);
-            info.Show();
+            using (var info = new SCulcaseInfoDialog()) {
+                info.SetText(dryRunLogText);
+                info.Show();
+            }
         }
 
         public static void ConvertSelection(ConversionMode mode, Document doc, IList<ElementId> elements)
         {
+            if (elements == null || doc == null) {
+                return;
+            }
             commit = true;
             EditTextParameters.mode = mode;
-            var trans = new Transaction(doc);
-            trans.Start("Convert selected elements to uppercase (SCulcase)");
-            foreach (Autodesk.Revit.DB.ElementId eid in elements) { 
-                Element e = doc.GetElement(eid);     
-                Category category = e.Category;
-                var enumCategory = (BuiltInCategory)category.Id.IntegerValue;
-                switch (enumCategory) {
-                    case BuiltInCategory.OST_Views:
-                        var v = (View)e;
-                        ConvertViewName(v);
-                        break;
-                    case BuiltInCategory.OST_TextNotes:
-                        var text = (TextElement)e;
-                        ConvertAnnotation(text);
-                        break;
-                    case BuiltInCategory.OST_Rooms:
-                        var room = (Room)e;
-                        ConvertRoom(room);
-                        break;
+            using (var trans = new Transaction(doc)) {
+                trans.Start("Convert selected elements to uppercase (SCulcase)");
+                foreach (Autodesk.Revit.DB.ElementId eid in elements) {
+                    Element e = doc.GetElement(eid);
+                    Category category = e.Category;
+                    var enumCategory = (BuiltInCategory)category.Id.IntegerValue;
+                    switch (enumCategory) {
+                        case BuiltInCategory.OST_Views:
+                            var v = (View)e;
+                            ConvertViewName(v);
+                            break;
+                        case BuiltInCategory.OST_TextNotes:
+                            var text = (TextElement)e;
+                            ConvertAnnotation(text);
+                            break;
+                        case BuiltInCategory.OST_Rooms:
+                            var room = (Room)e;
+                            ConvertRoom(room);
+                            break;
+                    }
                 }
+                trans.Commit();
             }
-            trans.Commit();
         }
 
         private static void Convert(ConversionMode mode, ConversionTypes types, Document doc)
@@ -137,11 +148,12 @@ namespace SCaddins.ParameterUtils
 
         private static void ConvertAllViewNames(Document doc)
         {
-            var f = new FilteredElementCollector(doc);
-            f.OfCategory(BuiltInCategory.OST_Views);
-            foreach (Element e in f) {
-                var v = (View)e;
-                ConvertViewName(v);
+            using (var f = new FilteredElementCollector(doc)) {
+                f.OfCategory(BuiltInCategory.OST_Views);
+                foreach (Element e in f) {
+                    var v = (View)e;
+                    ConvertViewName(v);
+                }
             }
         }
 
@@ -159,11 +171,12 @@ namespace SCaddins.ParameterUtils
 
         private static void ConvertAllViewNamesOnSheet(Document doc)
         {
-            var f = new FilteredElementCollector(doc);
-            f.OfCategory(BuiltInCategory.OST_Views);
-            foreach (Element e in f) {
-                var view = (View)e;
-                ConvertViewNameOnSheet(view);
+            using (var f = new FilteredElementCollector(doc)) {
+                f.OfCategory(BuiltInCategory.OST_Views);
+                foreach (Element e in f) {
+                    var view = (View)e;
+                    ConvertViewNameOnSheet(view);
+                }
             }
         }
 
@@ -178,11 +191,12 @@ namespace SCaddins.ParameterUtils
 
         private static void ConvertAllSheetNames(Document doc)
         {
-            var f = new FilteredElementCollector(doc);
-            f.OfCategory(BuiltInCategory.OST_Sheets);
-            foreach (Element e in f) {
-                var viewSheet = (ViewSheet)e;
-                ConvertSheetName(viewSheet);
+            using (var f = new FilteredElementCollector(doc)) {
+                f.OfCategory(BuiltInCategory.OST_Sheets);
+                foreach (Element e in f) {
+                    var viewSheet = (ViewSheet)e;
+                    ConvertSheetName(viewSheet);
+                }
             }
         }
 
@@ -197,11 +211,12 @@ namespace SCaddins.ParameterUtils
 
         private static void ConvertAllAnnotation(Document doc)
         {
-            var f = new FilteredElementCollector(doc);
-            f.OfCategory(BuiltInCategory.OST_TextNotes);
-            foreach (Element e in f) {
-                var text = (TextElement)e;
-                ConvertAnnotation(text);
+            using (var f = new FilteredElementCollector(doc)) {
+                f.OfCategory(BuiltInCategory.OST_TextNotes);
+                foreach (Element e in f) {
+                    var text = (TextElement)e;
+                    ConvertAnnotation(text);
+                }
             }
         }
 
@@ -217,11 +232,12 @@ namespace SCaddins.ParameterUtils
 
         private static void ConvertAllRooms(Document doc)
         {
-            var f = new FilteredElementCollector(doc);
-            f.OfCategory(BuiltInCategory.OST_Rooms);
-            foreach (Element e in f) {
-                var room = (Room)e;
-                ConvertRoom(room);
+            using (var f = new FilteredElementCollector(doc)) {
+                f.OfCategory(BuiltInCategory.OST_Rooms);
+                foreach (Element e in f) {
+                    var room = (Room)e;
+                    ConvertRoom(room);
+                }
             }
         }
 

@@ -129,9 +129,6 @@
     <CodeAnalysisRuleSet>SCaddins.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdWindows">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\AdWindows.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -153,21 +150,6 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="PresentationFramework" />
-    <Reference Include="RevitAPI">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\RevitAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="RevitAPIIFC">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\RevitAPIIFC.dll</HintPath>
-    </Reference>
-    <Reference Include="RevitAPIMacros">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\RevitAPIMacros.dll</HintPath>
-    </Reference>
-    <Reference Include="RevitAPIUI">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\RevitAPIUI.dll</HintPath>
-    </Reference>
-    <Reference Include="RevitAPIUIMacros">
-      <HintPath>packages\Revit-2017x64.Base.3.0.0\lib\net452\RevitAPIUIMacros.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>

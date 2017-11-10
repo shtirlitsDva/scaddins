@@ -68,16 +68,14 @@ namespace SCaddins.ExportManager
                 object sender, EventArgs e)
         {
             using (var uiapp = new UIApplication(this.udoc.Application.Application)) {
-                DialogHandler.AddRevitDialogHandler(uiapp);
                 foreach (DataGridViewRow row in this.dataGridView1.SelectedRows) {
                     var sc = row.DataBoundItem as ExportSheet;
                     if (sc == null) {
                         return;
                     }
-                    Autodesk.Revit.DB.FamilyInstance result =
-                        ExportManager.TitleBlockInstanceFromSheetNumber(sc.SheetNumber, this.doc);
-                    if (result != null) {
-                        this.udoc.ShowElements(result);
+                    Autodesk.Revit.DB.View view = sc.Sheet;
+                    if (view != null) {
+                        uiapp.ActiveUIDocument.ActiveView = view;
                     }
                 }
             }
@@ -685,7 +683,10 @@ namespace SCaddins.ExportManager
 
         private void CreateUserViewsToolStripMenuItemClick(object sender, System.EventArgs e)
         {
-            ViewUtilities.UserView.Create(this.SelectedSheets(), this.doc);
+            ViewUtilities.UserView.ShowSummaryDialog(
+                ViewUtilities.UserView.Create(this.SelectedSheets(), this.doc)
+            );
+            
         }
 
         private void RemoveUnderlaysFromViewsToolStripMenuItemClick(object sender, EventArgs e)

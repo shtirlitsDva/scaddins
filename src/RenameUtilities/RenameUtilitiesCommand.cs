@@ -1,4 +1,4 @@
-﻿// (C) Copyright 2014-2017 by Andrew Nicholas
+﻿// (C) Copyright 2017 by Andrew Nicholas
 //
 // This file is part of SCaddins.
 //
@@ -15,44 +15,49 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCaddins.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace SCaddins.ViewUtilities
+namespace SCaddins.RenameUtilities
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
 
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
-    public class CreateUserViewCommand : IExternalCommand
+    public class RenameUtilitiesCommand : IExternalCommand
     {
         public Result Execute(
             ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             if (commandData == null) {
-                return Result.Failed;
+                throw new ArgumentNullException("commandData");
             }
 
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            View view = doc.ActiveView;
-            List<View> newUserViews = new List<View>();
-
-            using (Transaction t = new Transaction(doc)) {
-                if (t.Start("SCuv Copies User View") == TransactionStatus.Started) {
-                    newUserViews = UserView.Create(view, doc);
-                    if (t.Commit() != TransactionStatus.Committed) {
-                        TaskDialog.Show("Failed", "Could not create user view[s]");
-                    }
-                }
+            if (doc == null) {
+                return Result.Failed;
             }
-            if(newUserViews == null || newUserViews.Count > 0) {
-                //FIXME show summary dialog
-                UserView.ShowSummaryDialog(newUserViews);
-                UIApplication uiapp = new UIApplication(doc.Application);
-                uiapp.ActiveUIDocument.ActiveView = newUserViews[0];
+            
+            IList<ElementId> elems = commandData.Application.ActiveUIDocument.Selection.GetElementIds().ToList<ElementId>();
+            if (elems.Count > 0) {
+                using (var t = new TransactionGroup(doc, "Convert selected text to uppercase")) {
+                    t.Start();
+                    RenameManager.ConvertSelectionToUppercase(doc, elems);
+                    t.Commit();
+                }
+                 return Result.Succeeded;
+            }
+                       
+            RenameManager manager = new RenameManager(doc);
+                          
+            using (var mainForm = new RenameUtilities.Form1(manager)) {
+                mainForm.ShowDialog();
             }
             return Result.Succeeded;
         }
     }
 }
+
 /* vim: set ts=4 sw=4 nu expandtab: */

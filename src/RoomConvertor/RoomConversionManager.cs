@@ -34,17 +34,23 @@ namespace SCaddins.RoomConvertor
         private Dictionary<string, ElementId> titleBlocks = 
             new Dictionary<string, ElementId>();
 
+        private Dictionary<string, string> departmentsInModel;
+
+
         private SCaddins.Common.SortableBindingListCollection<RoomConversionCandidate> allCandidates;
         private Document doc;
         private SCaddins.Common.SortableBindingListCollection<RoomConversionCandidate> candidates;
 
-        public RoomConversionManager(Document doc) {
+        public RoomConversionManager(Document doc)
+        {
+            departmentsInModel = new Dictionary<string, string>();
             candidates = new SCaddins.Common.SortableBindingListCollection<RoomConversionCandidate>();
             this.allCandidates = new SCaddins.Common.SortableBindingListCollection<RoomConversionCandidate>();
             this.doc = doc;
             this.titleBlocks = GetAllTitleBlockTypes(this.doc);
             this.TitleBlockId = ElementId.InvalidElementId;
             this.Scale = 50;
+            this.CropRegionEdgeOffset = 300;
             SheetCopier.SheetCopierManager.GetAllSheets(existingSheets, this.doc);
             SheetCopier.SheetCopierManager.GetAllViewsInModel(existingViews, this.doc);
             using (var collector = new FilteredElementCollector(this.doc)) {
@@ -53,20 +59,32 @@ namespace SCaddins.RoomConvertor
                     if (e.IsValidObject && (e is Room)) {
                         Room room = e as Room;
                         if (room.Area > 0 && room.Location != null) {
-                            allCandidates.Add(new RoomConversionCandidate(room, existingSheets, existingViews));
+                              allCandidates.Add(new RoomConversionCandidate(room, existingSheets, existingViews));
+                              Parameter p = room.LookupParameter("Department");
+                              if (p != null && p.HasValue) {
+                                  string depo = p.AsString().Trim();
+                                  if (departmentsInModel.Count > 0) {
+                                    if (!string.IsNullOrEmpty(depo) && !departmentsInModel.ContainsKey(depo)) {
+                                        departmentsInModel.Add(depo, depo);
+                                    }
+                                  } else {
+                                      if (!string.IsNullOrEmpty(depo)) {
+                                          departmentsInModel.Add(depo, depo);
+                                      }
+                                  }
+                              }
                         }
                     }
                 }
             }
-
-            // Initially add all canditates.
+            
             this.Reset();
         }
 
         public SCaddins.Common.SortableBindingListCollection<RoomConversionCandidate> Candidates {
             get { return candidates; }
         }
-
+        
         public Document Doc {
             get { return doc; }
         }
@@ -82,6 +100,11 @@ namespace SCaddins.RoomConvertor
         }
 
         public int Scale
+        {
+            get; set;
+        }
+
+        public int CropRegionEdgeOffset
         {
             get; set;
         }
@@ -182,6 +205,36 @@ namespace SCaddins.RoomConvertor
             }
         }
 
+        internal List<string> GetAllDepartments()
+        {
+            var result = new List<string>();
+            foreach (string s in this.departmentsInModel.Values) {
+                result.Add(s);
+            }
+            return result;
+        }
+
+        internal static List<string> GetAllDesignOptionNames(Document doc) {
+            var result = new List<string>();
+            var optIds = new List<ElementId>();
+            foreach (DesignOption dopt in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_DesignOptions)) {
+                ElementId optId = dopt.Id;
+                if (!optIds.Contains(optId)) {
+                    optIds.Add(optId);
+                }
+            }
+
+            result.Add("Main Model");
+
+            foreach (ElementId id in optIds) {
+                Element e = doc.GetElement(id);
+                var s = doc.GetElement(e.get_Parameter(BuiltInParameter.OPTION_SET_ID).AsElementId()).Name;
+                result.Add(s + @" : " + e.Name.Replace(@"(primary)", string.Empty).Trim());
+            }
+
+            return result;
+        }
+
         private static ElementId GetFloorPlanViewFamilyTypeId(Document doc) {
             using (var collector = new FilteredElementCollector(doc)) {
                 foreach (ViewFamilyType vft in collector.OfClass(typeof(ViewFamilyType))) {
@@ -279,8 +332,9 @@ namespace SCaddins.RoomConvertor
         }
 
         private static BoundingBoxXYZ CreateOffsetBoundingBox(double offset, BoundingBoxXYZ origBox) {
-            XYZ min = new XYZ(origBox.Min.X - offset, origBox.Min.Y - offset, origBox.Min.Z);
-            XYZ max = new XYZ(origBox.Max.X + offset, origBox.Max.Y + offset, origBox.Max.Z);
+            double offsetInFeet = SCaddins.Common.MiscUtilities.MillimetersToFeet(offset);
+            XYZ min = new XYZ(origBox.Min.X - offsetInFeet, origBox.Min.Y - offsetInFeet, origBox.Min.Z);
+            XYZ max = new XYZ(origBox.Max.X + offsetInFeet, origBox.Max.Y + offsetInFeet, origBox.Max.Z);
             BoundingBoxXYZ result = new BoundingBoxXYZ();
             result.Min = min;
             result.Max = max;
@@ -289,22 +343,39 @@ namespace SCaddins.RoomConvertor
 
         private bool CreateRoomMass(Room room)
         {    
+            if (!SpatialElementGeometryCalculator.CanCalculateGeometry(room)) {
+                return false;
+            }
             try {
                 SpatialElementGeometryResults results;
                 using (var calculator = new SpatialElementGeometryCalculator(doc)) {
-                    results = calculator.CalculateSpatialElementGeometry(room);
+                           results = calculator.CalculateSpatialElementGeometry(room);
                 }
                 using (Solid roomSolid = results.GetGeometry()) {
                     var eid = new ElementId(BuiltInCategory.OST_Mass);
+                    #if REVIT2018 || REVIT2017
                     DirectShape roomShape = DirectShape.CreateElement(doc, eid);
-                    roomShape.SetShape(new GeometryObject[] { roomSolid });
-                    CopyAllRoomParametersToMasses(room, roomShape);
+                    #else
+                    DirectShape roomShape = DirectShape.CreateElement(doc, eid, "A", "B");
+                    #endif
+                    if (roomShape != null && roomSolid.Volume > 0 && roomSolid.Faces.Size > 0) {
+                        var geomObj = new GeometryObject[] { roomSolid };
+                        if (geomObj != null && geomObj.Length > 0) {
+                            roomShape.SetShape(geomObj);
+                            CopyAllRoomParametersToMasses(room, roomShape);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
                 }
             } catch (Exception ex) {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 return false;
             }
-            return true;
+            return false;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -324,19 +395,23 @@ namespace SCaddins.RoomConvertor
             plan.ViewTemplateId = ElementId.InvalidElementId;
             plan.Scale = this.Scale;
             BoundingBoxXYZ originalBoundingBox = candidate.Room.get_BoundingBox(plan);
-
+            
             // Put them on sheets
-            plan.CropBox = CreateOffsetBoundingBox(200, originalBoundingBox);
+            plan.CropBox = CreateOffsetBoundingBox(50000, originalBoundingBox);
             plan.Name = candidate.DestinationViewName;
 
             // Shrink the bounding box now that it is placed
             Viewport vp = Viewport.Create(this.doc, sheet.Id, plan.Id, sheetCentre);
 
             // Shrink the bounding box now that it is placed
-            plan.CropBox = originalBoundingBox;
+            plan.CropBox = CreateOffsetBoundingBox(this.CropRegionEdgeOffset, originalBoundingBox);
 
             // FIXME - To set an empty view title - so far this seems to work with the standard revit template...
             vp.ChangeTypeId(vp.GetValidTypes().Last());
+
+            // FIXME Apply a view template
+            // NOTE This could cause trouble with view scales
+            // plan.ViewTemplateId = 
         }
     }
 }

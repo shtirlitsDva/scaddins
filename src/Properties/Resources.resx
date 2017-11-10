@@ -543,14 +543,11 @@
   <data name="AssociatedLevel" xml:space="preserve">
     <value>Associated Level</value>
   </data>
-  <data name="ChangeCase" xml:space="preserve">
-    <value>Change Case</value>
+  <data name="RenameLongDescription" xml:space="preserve">
+    <value>Pre-select text/tags to change a selection to uppercase. Run with no selection to rename selected parameter categories with advanced options.</value>
   </data>
-  <data name="ChangeCaseLongDescription" xml:space="preserve">
-    <value>Pre-select text/tags to change a selection. Run with no selection to change the entire project.</value>
-  </data>
-  <data name="ChangeCaseToolTip" xml:space="preserve">
-    <value>Convert text from upper to lower case, or vise-versa</value>
+  <data name="RenameToolTip" xml:space="preserve">
+    <value>Rename paramters.</value>
   </data>
   <data name="CopyDetailing" xml:space="preserve">
     <value>Copy Detailing</value>
@@ -668,5 +665,11 @@
   </data>
   <data name="SpacerHyphen" xml:space="preserve">
     <value> - </value>
+  </data>
+  <data name="MessageElapsedTimeForLastExport" xml:space="preserve">
+    <value>Elapsed Time for last export: </value>
+  </data>
+  <data name="MessageNoPrintSettingAssigned" xml:space="preserve">
+    <value>No print setting assigned.</value>
   </data>
 </root>
